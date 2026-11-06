@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # تصويبات ما بعد المراجعة المستقلة (research/review.md)
 import re,json
-DROP={'asma-muhammad','sayyid-haydar-hilli-araabi','tawqi-samari-mushahada','wiladat-riwayat-sana','ghayba-tawqi-mufid-wafa','tajil-takhir-husayn','tajil-idhaa','bahr-uloum-sahla-saff','tajil-fasad-ishrat','alamat-rayat-khurasan','alamat-ayat-samawiyya','fitan-rayat-sham','adwar-dar-mulk','haj-ali-baghdadi'}
+DROP={'asma-muhammad','marashi-masjid-zayd','aqid-bahrani-wudu','tawqi-samari-mushahada','wiladat-riwayat-sana','ghayba-tawqi-mufid-wafa','tajil-takhir-husayn','tajil-idhaa','bahr-uloum-sahla-saff','tajil-fasad-ishrat','alamat-rayat-khurasan','alamat-ayat-samawiyya','fitan-rayat-sham','adwar-dar-mulk','haj-ali-baghdadi'}
 # (id, القديم, الجديد): أخطاء صف ظاهرة فقط
 TY=[('bahth-asala','بشخصه: محمد بن الحسن العسكري','بشخصه: ابن الحسن العسكري'),('ibrahim-mahziyar-taif','« م ح م د » ابن الحسن','«...» ابن الحسن'),('ibrahim-mahziyar-taif','بجبين محمد وموسى','بجبين «...» وموسى'),('wiladat-hakima-kamal','لا إلا إله الله','لا إله إلا الله'),('wiladat-hakima-kamal','يا سيدني','يا سيدتي'),
  ('tawqi-hawadith-waqia','وعلى بن اتبع','وعلى من اتبع'),('tawqi-hawadith-waqia','فأنما يأكل','فإنما يأكل'),
@@ -10,6 +10,8 @@ TY=[('bahth-asala','بشخصه: محمد بن الحسن العسكري','بشخ
  ('ibrahim-mahziyar-taif','من ملابراهم الله','من ملأ براهم الله'),
  ('tadarru-ghayba','الاَمِْ','الاَمْرِ'),('bahth-falsafa-ghayba','تخفى والدته','تخفى ولادته'),('tajil-idda-ikhlas','أظهره الله أمره','أظهر الله أمره')]
 PATCH={
+ 'sayyid-haydar-hilli-araabi':dict(grade='istinas',title='السيد حيدر الحلي والأعرابي في طريق كربلاء (للاستئناس)',gradeNote='من مقال في صحيفة صدى المهدي، ولم يصرّح الكاتب بأن الأعرابي هو الإمام عليه السلام.'),
+ 'qazwini-anaza-karbala-road':dict(section='مع العلماء'),'qazwini-mazidiya-hamza':dict(section='مع العلماء'),
  'alamat-kusuf-khusuf':dict(grade='bahth',gradeNote='من كلام الشيخ المفيد في الإرشاد، وليس لفظ معصوم.',source=dict(book='الإرشاد',author='الشيخ المفيد',vol='',page='')),
  'ibrahim-mahziyar-taif':dict(summary='',gradeNote='حُجب الاسم الشريف من النص. واستشكل محقق كمال الدين في هامش ص445 في هذه الرواية لتقدم زمان راويها عن عصر الغيبة.'),
  'tawqi-samari-akhir':dict(title='آخر التوقيعات إلى السمري',grade='tawqi',gradeNote='كمال الدين، الحديث 44.',summary=''),

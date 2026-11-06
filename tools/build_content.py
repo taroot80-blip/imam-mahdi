@@ -4,7 +4,7 @@ import json,glob,re,sys
 GR={'tawqi','riwaya','thiqa','kutub','dua','bahth','istinas'}
 DOORS={'sifat','liqaat','aqwal','bahth','ghayba','tajil','alamat','tawasul','zuhur'}
 out=[];rej=[];seen=set()
-for f in sorted(glob.glob('research/[a-z].json')+glob.glob('research/e-*.json')):
+for f in sorted(glob.glob('research/[a-z].json')+glob.glob('research/b[0-9].json')+glob.glob('research/e-*.json')):
     for it in json.load(open(f,encoding='utf8')):
         why=[]
         if it.get('door') not in DOORS: why.append('door')
