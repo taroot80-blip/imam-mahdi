@@ -1,7 +1,7 @@
 'use strict';
 const App=(()=>{
   const view=document.getElementById('view'),sheet=document.getElementById('sheet'),toastEl=document.getElementById('toast');
-  const GRADES={tawqi:'توقيع شريف',riwaya:'رواية في مصدر معتبر',thiqa:'عالم ثقة',kutub:'نقل كتب اللقاءات',dua:'دعاء مأثور',bahth:'بحث علمي'};
+  const GRADES={tawqi:'توقيع شريف',riwaya:'رواية في مصدر معتبر',thiqa:'عالم ثقة',kutub:'نقل كتب اللقاءات',dua:'دعاء مأثور',bahth:'بحث علمي',istinas:'للاستئناس'};
   window.gradeName=g=>GRADES[g]||'';
   const byId=id=>CONTENT.find(x=>x.id===id);
   const inDoor=d=>CONTENT.filter(x=>x.door===d);

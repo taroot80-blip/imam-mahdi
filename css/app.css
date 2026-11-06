@@ -300,3 +300,5 @@ textarea{width:100%;font:400 16px/1.7 var(--body);color:inherit;background:rgba(
 @media(min-width:760px){.bot{left:50%;right:auto;bottom:12px;width:520px;transform:translateX(-50%);border:1px solid var(--line2);border-radius:20px;padding:6px}main{padding-bottom:110px}}
 
 .src-k{color:var(--gold2);font-size:14.5px}.bk-src .src-k{color:#6a3a00}
+
+.g-istinas{background:rgba(217,160,107,.16);color:#f0c9a0;border-color:#d9a06b66}
