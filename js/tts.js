@@ -1,6 +1,9 @@
 // القارئ الآلي: رجل أو امرأة. يعتمد على أصوات الجهاز، وعند نقص أحدهما يقرّبه بتغيير طبقة الصوت
 'use strict';
 const TTS=(()=>{
+  const N=window.NativeApp;
+  if(N){let cb=null;window.__ttsDone=()=>{const f=cb;cb=null;f&&f()};
+    return{info(){return{ok:N.ttsInfo()==='1'||true,m:true,f:true,count:1}},speak(t,g,done){cb=done;N.speak(String(t),g,store.get('ttsRate',.92));return true},cancel(){cb=null;N.stopSpeak()},pause(){},resume(){}}}
   const S=window.speechSynthesis;let voices=[],stop=true,onEnd=null;
   const MALE=/naayf|hamed|maged|majed|tarek|fahed|shakir|rami|moaz|omar|ali|salim|bassel|taim|male/i;
   const FEMALE=/hoda|salma|zariyah|laila|layla|mouna|amina|fatima|sana|iman|mona|rana|noura|female|google/i;

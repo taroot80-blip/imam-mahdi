@@ -32,9 +32,9 @@ const App=(()=>{
   function dial(){const ticks=Array.from({length:60},(_,i)=>`<line class="t ${i%5?'':'b'}" x1="180" y1="10" x2="180" y2="${i%5?15:20}" transform="rotate(${i*6} 180 180)"/>`).join('');
     const orbs=Array.from({length:12},(_,i)=>{const a=i*30*Math.PI/180;return `<circle class="o" cx="${(180+Math.sin(a)*133).toFixed(1)}" cy="${(180-Math.cos(a)*133).toFixed(1)}" r="3.4" style="--i:${i}"/>`}).join('');
     return `<svg class="dial" viewBox="0 0 360 360" aria-hidden="true">
-      <defs><path id="rt" d="M180 180m-143 0a143 143 0 1 1 286 0a143 143 0 1 1 -286 0"/><linearGradient id="dg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe49a"/><stop offset="1" stop-color="#c58a1c"/></linearGradient></defs>
+      <defs><path id="rt" d="M37 180a143 143 0 0 1 286 0"/><path id="rb" d="M26 180a154 154 0 0 0 308 0"/><linearGradient id="dg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe49a"/><stop offset="1" stop-color="#c58a1c"/></linearGradient></defs>
       <circle cx="180" cy="180" r="172" class="c1"/><g class="ring-t">${ticks}</g>
-      <g class="ring-a"><text class="rtx" direction="rtl"><textPath href="#rt" startOffset="100%">السلام عليك يا بقية الله في أرضه · السلام عليك يا ميثاق الله · السلام عليك يا وعد الله المضمون · السلام عليك يا بقية الله في أرضه ·</textPath></text></g>
+      <text class="rtx" direction="rtl" text-anchor="middle"><textPath href="#rt" startOffset="50%">السلام عليك يا بقية الله في أرضه</textPath></text><text class="rtx" direction="rtl" text-anchor="middle"><textPath href="#rb" startOffset="50%">السلام عليك يا وعد الله المضمون</textPath></text>
       <g class="ring-b">${orbs}<circle cx="180" cy="180" r="133" class="c2"/></g>
       <circle cx="180" cy="180" r="116" class="c3"/><circle cx="180" cy="180" r="116" class="c4" pathLength="60" id="secArc"/>
       <g id="secHand"><circle cx="180" cy="64" r="4.5" fill="url(#dg)"/></g></svg>`}
@@ -53,6 +53,7 @@ const App=(()=>{
   function searchBar(v=''){return `<form class="sbar" id="sbar" role="search"><span>${ic('search')}</span><input id="q" type="search" enterkeyhint="search" placeholder="ابحث في الموضوعات والكتب" aria-label="البحث" value="${esc(v)}"><button type="button" class="mic" id="mic" aria-label="التلقين الصوتي" data-sfx="mic">${ic('mic')}</button></form>`}
   function wireSearch(){const f=document.getElementById('sbar');if(!f)return;f.onsubmit=e=>{e.preventDefault();location.hash='#/search/'+encodeURIComponent(f.q.value.trim())};
     const m=document.getElementById('mic'),SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(window.NativeApp){window.__speech=t=>{if(t){f.q.value=t;location.hash='#/search/'+encodeURIComponent(t.trim())}};m.onclick=()=>NativeApp.listen();return}
     if(!SR){m.onclick=()=>toast('التلقين الصوتي غير متاح في هذا المتصفح');return}
     m.onclick=()=>{const r=new SR();r.lang='ar-KW';r.interimResults=true;m.classList.add('on');toast('تكلّم الآن');
       r.onresult=e=>{const t=[...e.results].map(x=>x[0].transcript).join('');f.q.value=t;if(e.results[e.results.length-1].isFinal){m.classList.remove('on');location.hash='#/search/'+encodeURIComponent(t.trim())}};
@@ -103,7 +104,7 @@ const App=(()=>{
       <h2>أسئلتي</h2>${lst(Object.keys(q),(it,i)=>`<a class="it" href="#/item/${it.id}"><b>${esc(it.title)}</b><small>${esc(q[it.id])}</small></a>`)||'<p class="muted">لا أسئلة بعد.</p>'}
       ${r.length?`<h2>رقاعي</h2>${r.map(x=>`<div class="it"><small>${esc(x.text)}</small></div>`).join('')}`:''}
       <div class="rw"><button class="btn2" id="ex" data-sfx="save">صدّر نسخة احتياطية</button><label class="btn2">استورد نسخة<input type="file" id="im" accept="application/json" hidden></label></div></section>`;
-    document.getElementById('ex').onclick=()=>{const u=URL.createObjectURL(new Blob([store.exportAll()],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download='المستور-دفتري.json';a.click();URL.revokeObjectURL(u)};
+    document.getElementById('ex').onclick=()=>{if(window.NativeApp){NativeApp.saveText('المستور-دفتري.json',store.exportAll());return}const u=URL.createObjectURL(new Blob([store.exportAll()],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download='المستور-دفتري.json';a.click();URL.revokeObjectURL(u)};
     document.getElementById('im').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{store.importAll(t);toast('استُعيد دفترك');daftar()}catch(x){toast('الملف غير صالح')}})}}
   function item(id){const it=byId(id);if(!it)return notFound();
     if(it.door==='liqaat'){if(!view.innerHTML)door('liqaat');Book.open(it);return}
@@ -133,7 +134,7 @@ const App=(()=>{
       <label><span>حجم الخط</span><input type="range" id="sFont" min="16" max="26" value="${store.get('font',19)}"></label>
       <button class="btn2" id="replay" data-sfx="tap">أعد عرض الافتتاحية</button></section>
     <section class="set"><h3>عن الحساب</h3><p class="muted">يبدأ العمر من فجر الجمعة ١٥ شعبان ٢٥٥هـ بسامراء، وهو المعتمد في هذا التطبيق، وفي السنة أقوال أخرى في باب ولادته. ويتقدم بالتقويم الهجري أم القرى. والساعات والدقائق تقريبية لأن وقت الفجر يومها غير مضبوط بالدقيقة.</p>
-    <h3>عن المحتوى</h3><p class="muted">كل نص مربوط بمصدره. وما لم يكتمل توثيقه يظهر «قيد التوثيق». ودرجة كل نص تبيّن طريق نقله، ولا تعني الحكم بصحته.</p></section>`;
+    <h3>عن المحتوى</h3><p class="muted"><a href="privacy.html" target="_blank" rel="noopener" style="color:var(--gold2)">سياسة الخصوصية</a></p><p class="muted">كل نص مربوط بمصدره. وما لم يكتمل توثيقه يظهر «قيد التوثيق». ودرجة كل نص تبيّن طريق نقله، ولا تعني الحكم بصحته.</p></section>`;
     document.getElementById('mail').onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText('taroot80@gmail.com');toast('نُسخ البريد')};
     document.getElementById('sSnd').onchange=()=>{SFX.toggle();sndIcon()};document.getElementById('sSpl').onchange=e=>store.set('splash',e.target.checked);
     document.getElementById('sFont').oninput=e=>{store.set('font',+e.target.value);applyFont()};document.getElementById('replay').onclick=()=>{store.set('splash',true);Splash.replay()}}
@@ -149,7 +150,8 @@ const App=(()=>{
     document.getElementById('sndBtn').onclick=()=>{SFX.toggle();sndIcon();toast(SFX.on()?'الأصوات مفعّلة':'الأصوات مطفأة')};
     addEventListener('hashchange',route);route();
     if(document.fonts&&document.fonts.load)document.fonts.load('400 19px Amiri','بسم').catch(()=>{});Splash.start(()=>{});
-    if('serviceWorker'in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{})}
-  return{boot,actions,toast};
+    if('serviceWorker'in navigator&&location.protocol==='https:'&&!window.NativeApp)navigator.serviceWorker.register('sw.js').catch(()=>{})}
+  function back(){if(!sheet.hidden){closeSheet();return true}if(Book.isOpen()){document.querySelector('.bk-close').click();return true}const h=location.hash;if(h&&h!=='#/'){history.back();return true}return false}
+  return{boot,actions,toast,back};
 })();
 window.App=App;App.boot();
