@@ -11,7 +11,7 @@ marks=[]
 def strip_pg(s):
     out=[];pos=0;n=0
     for m in PG.finditer(s):
-        out.append(s[pos:m.start()]);n+=m.start()-pos;marks.append((n,int(m[1])));pos=m.end();out.append(' ');n+=1
+        out.append(s[pos:m.start()]);n+=m.start()-pos;marks.append((n,int(m[1])));pos=m.end();sep='\n' if re.match(r'\d+ ـ ',s[pos:pos+8]) else ' ';out.append(sep);n+=1
     out.append(s[pos:]);return ''.join(out)
 t=strip_pg(t)
 def page_at(i):
@@ -28,7 +28,7 @@ def hadith(key):
         if k in nz(t[a:b]): return a,b
     raise SystemExit('لا يوجد: '+key)
 def clean(x):
-    x=re.sub(r' ?\( \d+ \)','',x);x=re.sub(r'^\s*\d+ ـ ','',x)
+    x=re.sub(r' ?\( \d+ \)','',x);x=re.sub(r'\[ ت في \]','',x);x=re.sub(r'\[ ([^\]]{1,30}) \]',r'\1',x);x=re.sub(r'^\s*\d+ ـ ','',x)
     x=re.sub(r' ([،.:؛؟!])',r'\1',x);x=re.sub(r'[ \t]+',' ',x)
     return x.strip()
 def paras(x,n=80):

@@ -72,7 +72,7 @@ const App=(()=>{
   const head=d=>`<a class="back" href="#/" data-sfx="close">${ic('back')} الرئيسية</a><header class="dh" style="--c:${d.c}"><span class="d-ic">${ic(d.i)}</span><div><h1>${d.t}</h1><p>${d.s}</p></div></header>`;
   const card=(it,i)=>`<a class="it" href="#/item/${it.id}" style="--i:${i}" data-sfx="paper"><b>${esc(it.title)}</b>${it.witness?`<small>${esc(it.witness)}</small>`:''}<span class="grade g-${esc(it.grade)}">${esc(gradeName(it.grade))}</span></a>`;
   const pending=t=>`<div class="pend"><b>${esc(t)}</b><span>قيد التوثيق</span></div>`;
-  const PLAN={sifat:['ولادته','أسماؤه وألقابه','صفاته ووصفه'],liqaat:['مع الرواة','مع العلماء','مع الشعراء','مع العامة'],ghayba:['في الغيبة الصغرى','في الغيبة الكبرى'],tajil:['الأسباب الإيجابية: الإعداد','الأسباب السلبية: انتشار الظلم والفساد وأنواعه'],aqwal:['توقيعاته','أقواله وما أُثر عنه'],alamat:['العلامات الحتمية','علامات غير حتمية','الفتن والوقائع'],tawasul:['الزيارة','طلب لقائه','كتابة الرقعة','التوسل به','دعاء الندبة','دعاء العهد','الاستغاثة به','التضرع له'],zuhur:['مسيرة الظهور','أدواره']};
+  const PLAN={sifat:['ولادته','أسماؤه وألقابه','صفاته ووصفه'],liqaat:['مع الرواة','مع العلماء','مع الشعراء','مع العامة'],ghayba:['في الغيبة الصغرى','في الغيبة الكبرى'],tajil:['الأسباب الإيجابية: الإعداد','الأسباب السلبية: انتشار الظلم والفساد وأنواعه'],aqwal:['توقيعاته','أقواله وما أُثر عنه'],alamat:['العلامات الحتمية','علامات أخرى','الفتن والوقائع'],tawasul:['الزيارة','طلب لقائه','كتابة الرقعة','التوسل به','دعاء الندبة','دعاء العهد','الاستغاثة به','التضرع له'],zuhur:['مسيرة الظهور','أدواره']};
   function door(id){const d=DOORS.find(x=>x.id===id);if(!d)return notFound();
     if(id==='kutub')return kutub(d);if(id==='mawaqi')return mawaqi(d);if(id==='daftar')return daftar();
     const secs=[...new Set([...(PLAN[id]||[]),...sections(id)])];
@@ -132,7 +132,7 @@ const App=(()=>{
       <label><span>الافتتاحية عند الفتح</span><input type="checkbox" id="sSpl" ${store.get('splash',true)?'checked':''}></label>
       <label><span>حجم الخط</span><input type="range" id="sFont" min="16" max="26" value="${store.get('font',19)}"></label>
       <button class="btn2" id="replay" data-sfx="tap">أعد عرض الافتتاحية</button></section>
-    <section class="set"><h3>عن الحساب</h3><p class="muted">يبدأ العمر من فجر الجمعة ١٥ شعبان ٢٥٥هـ بسامراء، ويتقدم بالتقويم الهجري أم القرى. والساعات والدقائق تقريبية لأن وقت الفجر يومها غير مضبوط بالدقيقة.</p>
+    <section class="set"><h3>عن الحساب</h3><p class="muted">يبدأ العمر من فجر الجمعة ١٥ شعبان ٢٥٥هـ بسامراء، وهو المعتمد في هذا التطبيق، وفي السنة أقوال أخرى في باب ولادته. ويتقدم بالتقويم الهجري أم القرى. والساعات والدقائق تقريبية لأن وقت الفجر يومها غير مضبوط بالدقيقة.</p>
     <h3>عن المحتوى</h3><p class="muted">كل نص مربوط بمصدره. وما لم يكتمل توثيقه يظهر «قيد التوثيق». ودرجة كل نص تبيّن طريق نقله، ولا تعني الحكم بصحته.</p></section>`;
     document.getElementById('mail').onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText('taroot80@gmail.com');toast('نُسخ البريد')};
     document.getElementById('sSnd').onchange=()=>{SFX.toggle();sndIcon()};document.getElementById('sSpl').onchange=e=>store.set('splash',e.target.checked);

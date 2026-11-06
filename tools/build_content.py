@@ -25,6 +25,7 @@ for f in glob.glob('research/over-*.json'):
                 if o.get(k): it[k]=o[k]
             if o.get('book'): it['source']['book']=o['book'];it['source']['author']=o.get('author','');it['source']['vol']=o.get('vol','')
             if o.get('gradeNote') is not None: it['gradeNote']=o['gradeNote']
+import sys;sys.path.insert(0,'tools');import fixes;out=fixes.apply(out)
 open('data/content.js','w',encoding='utf8').write("'use strict';\nconst CONTENT="+json.dumps(out,ensure_ascii=False,indent=0)+";\n")
 from collections import Counter
 print(len(out),Counter(i['door'] for i in out)); print('rejected',rej)
