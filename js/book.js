@@ -31,7 +31,7 @@ const Book=(()=>{
   function pageHTML(p,i){
     const n=`<div class="bk-no">${ar(i+1)}</div>`;
     if(!p)return '';
-    if(p.kind==='title')return `<div class="bk-title"><i class="orn"></i><small>${esc(item.section||'')}</small><h2>${esc(item.title)}</h2>${item.witness?`<p>${esc(item.witness)}</p>`:''}<span class="grade g-${esc(item.grade)}">${esc(gradeName(item.grade))}</span><i class="orn b"></i></div>`;
+    if(p.kind==='title')return `<div class="bk-title"><i class="orn"></i><small>${esc(item.section||'')}</small><h2>${esc(item.title)}</h2>${item.witness?`<p>${esc(item.witness)}</p>`:''}<span class="grade g-${esc(item.grade)}">${esc(gradeName(item.grade))}</span>${textKind(item)?`<small>${textKind(item)}</small>`:''}<i class="orn b"></i></div>`;
     if(p.kind==='orn')return `<div class="bk-title"><i class="orn"></i></div>`;
     if(p.kind==='source')return `<div class="bk-src">${sourceHTML(item)}</div>${n}`;
     return `<div class="bk-text">${p.p.map(x=>`<p>${esc(x)}</p>`).join('')}</div>${n}`;

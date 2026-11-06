@@ -8,10 +8,11 @@ const App=(()=>{
   const sections=d=>[...new Set(inDoor(d).map(x=>x.section))];
   let toastT;
   function toast(m){toastEl.textContent=m;toastEl.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>toastEl.classList.remove('on'),2400)}
+  window.textKind=it=>!it.text?'خلاصة بعبارة التطبيق، والأصل في المصدر':it.text.length<140?'مقتطف، والنص الكامل في المصدر':'';
   window.sourceHTML=it=>{const s=it.source||{};const loc=[s.vol&&`ج${s.vol}`,s.page&&`ص${s.page}`].filter(Boolean).join('، ');
     return `<h4>المصدر</h4><p class="src-main"><b>${esc(s.book||'')}</b>${s.author?` · ${esc(s.author)}`:''}${loc?` · ${esc(loc)}`:''}</p>
     ${it.alsoIn&&it.alsoIn.length?`<p class="src-also">وورد في: ${esc(it.alsoIn.join('، '))}</p>`:''}
-    <p class="src-g"><span class="grade g-${esc(it.grade)}">${esc(gradeName(it.grade))}</span>${it.gradeNote?` ${esc(it.gradeNote)}`:''}</p>
+    ${textKind(it)?`<p class="src-k">${textKind(it)}</p>`:''}<p class="src-g"><span class="grade g-${esc(it.grade)}">${esc(gradeName(it.grade))}</span>${it.gradeNote?` ${esc(it.gradeNote)}`:''}</p>
     ${it.url?`<a class="src-link" href="${esc(it.url)}" target="_blank" rel="noopener" data-sfx="key">${ic('link')} افتح المصدر</a>`:''}`};
   function actions(box,it){
     const row=[['fav','heart','المفضلة'],['marks','mark','علامة رجوع']];
