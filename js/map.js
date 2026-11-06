@@ -13,6 +13,7 @@ const RouteMap=(()=>{
   function render(items){
     const stops=items.filter(i=>i.stop&&i.lat&&i.lng).sort((a,b)=>(a.order||0)-(b.order||0));
     const pts=stops.map(s=>P(+s.lat,+s.lng));
+    pts.forEach((p,i)=>{for(let j=0;j<i;j++){if(Math.hypot(p[0]-pts[j][0],p[1]-pts[j][1])<30){p[1]+=34}}});
     const path=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
     const dots=stops.map((s,i)=>{const[x,y]=pts[i];return `<g class="mp-s" data-i="${i}" tabindex="0" role="button" aria-label="${esc(s.stop)}" transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><circle r="26" class="h"/><circle r="16" class="p"/><circle r="12" class="d"/><text class="n" y="6">${ar(i+1)}</text><text class="l" x="-18" y="7">${esc(s.stop)}</text></g>`}).join('');
     return `<div class="mp"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="خريطة توضيحية لمسار المسيرة">

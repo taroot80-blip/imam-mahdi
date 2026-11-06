@@ -140,7 +140,7 @@ const App=(()=>{
   const notFound=()=>{view.innerHTML=`<div class="pend"><b>لم نجد هذه الصفحة</b><a class="btn" href="#/">عُد إلى الرئيسية</a></div>`};
   const applyFont=()=>document.documentElement.style.setProperty('--read',store.get('font',19)+'px');
   const sndIcon=()=>{document.getElementById('sndBtn').innerHTML=ic(SFX.on()?'vol':'mute')};
-  function route(){const h=location.hash.slice(1)||'/',[,a,b]=h.split('/');TTS.cancel();closeSheet();if(Book.isOpen()&&a!=='item')Book.close();
+  function route(){const h=location.hash.slice(1)||'/',[,a,b]=h.split('/');TTS.cancel();closeSheet();if(Book.isOpen()&&!(a==='item'&&(byId(b)||{}).door==='liqaat'))Book.close();
     clearInterval(ageT);scrollTo(0,0);
     document.querySelectorAll('.bot a').forEach(x=>x.classList.toggle('on',x.dataset.n===(a||'home')));
     if(!a)home();else if(a==='doors')doorsPage();else if(a==='door')door(b);else if(a==='item')item(b);else if(a==='search')search(decodeURIComponent(b||''));else if(a==='daftar')daftar();else if(a==='settings')settings();else notFound();
