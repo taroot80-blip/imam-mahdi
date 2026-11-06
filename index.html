@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>المستور</title>
+<meta name="description" content="المستور: موسوعة الإمام المهدي عليه السلام: عمره الشريف، صفاته، لقاءاته، كتبه، توقيعاته، شؤونه في الغيبة، وعلامات الظهور، موثقة بمصادرها.">
+<meta name="theme-color" content="#0b0805">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div id="scene" aria-hidden="true"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<header class="top" id="top">
+  <a class="brand" href="#/" aria-label="الرئيسية"><span class="logo"></span><b>المستور</b></a>
+  <div class="top-a">
+    <button id="sndBtn" class="ic" aria-label="تشغيل الأصوات وإطفاؤها" data-sfx="wood"></button>
+    <a href="#/settings" class="ava" aria-label="الإعدادات"><img src="assets/designer.webp" alt="الإعدادات"></a>
+  </div>
+</header>
+<main id="view" tabindex="-1"></main>
+<nav class="bot" id="bot" aria-label="التنقل">
+  <a href="#/" data-n="home"><span data-i="home"></span>الرئيسية</a>
+  <a href="#/doors" data-n="doors"><span data-i="doors"></span>الأبواب</a>
+  <a href="#/search" data-n="search"><span data-i="search"></span>البحث</a>
+  <a href="#/daftar" data-n="daftar"><span data-i="note"></span>دفتري</a>
+</nav>
+<div id="sheet" hidden></div>
+<div id="book" hidden></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<section id="splash" hidden aria-label="افتتاحية">
+  <audio id="splashAudio" preload="auto"><source src="assets/splash.ogg" type="audio/ogg"><source src="assets/splash.m4a" type="audio/mp4"></audio>
+  <div class="sp-hex"></div>
+  <div class="sp-img"><img src="assets/splash.webp" alt=""><i class="sp-sweep"></i></div>
+  <div class="sp-sparks"></div>
+  <div class="sp-cap sp-c1"><b>السلام عليك يا بقية الله</b><u></u></div>
+  <div class="sp-cap sp-c2"><b>وُلد فجر الجمعة</b><small>١٥ شعبان ٢٥٥هـ · سامراء</small><u></u></div>
+  <div class="sp-cap sp-c3"><b>يملأ الأرض قسطًا وعدلًا</b><u></u></div>
+  <div class="sp-panels"><span class="p1"><i></i>الغيبة الصغرى</span><span class="p2"><i></i>الغيبة الكبرى</span><span class="p3"><i></i>الظهور</span></div>
+  <div class="sp-ring"><i></i><i></i><i></i><div><small>عمره الشريف</small><b data-age></b><em data-min></em></div></div>
+  <div class="sp-bloom"></div>
+  <div class="sp-end"><h1>المستور</h1><p>بَقِيَّتُ اللهِ خَيْرٌ لَكُمْ</p><small>بإشراف مجموعة بقية الله</small><u></u></div>
+  <div class="sp-endimg"><img src="assets/splash.webp" alt=""></div>
+  <button class="sp-gate" aria-label="ادخل"><i></i><i></i><span>المس للدخول</span></button>
+  <button class="sp-skip" data-sfx="tap">تخطَّ</button>
+</section>
+
+<script src="js/age.js"></script>
+<script src="js/store.js"></script>
+<script src="js/sfx.js"></script>
+<script src="js/tts.js"></script>
+<script src="data/doors.js"></script>
+<script src="data/books.js"></script>
+<script src="data/content.js"></script>
+<script src="js/splash.js"></script>
+<script src="js/book.js"></script>
+<script src="js/map.js"></script>
+<script src="js/ruqa.js"></script>
+<script src="js/app.js"></script>
+<script src="js/fx.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+// الأبواب الاثنا عشر. لكل باب توقيعه: أيقونة، صوت، اتجاه دخول (dx,dy)، حركة ضغط (m)، حركة سكون (idle)، لون
+'use strict';
+const DOORS=[
+ {id:'sifat',t:'عمره وصفاته',s:'ولادته وأسماؤه ووصفه',i:'star',sfx:'ember',m:'pulse',idle:'glow',c:'#F2B632',dx:-60,dy:-20},
+ {id:'liqaat',t:'لقاءاته',s:'الرواة والعلماء والشعراء والعامة',i:'book',sfx:'paper',m:'flip',idle:'tilt',c:'#14B8A6',dx:60,dy:-20},
+ {id:'aqwal',t:'أقواله وتوقيعاته',s:'ما أُثر عنه عليه السلام',i:'pen',sfx:'pen',m:'sway',idle:'write',c:'#d9a06b',dx:-40,dy:50},
+ {id:'kutub',t:'الكتب',s:'موسوعية وفردانية: ٦٢ عنوانًا',i:'shelf',sfx:'wood',m:'drop',idle:'bob',c:'#c9a25a',dx:40,dy:50},
+ {id:'bahth',t:'البحوث العقدية',s:'طول العمر والغيبة والانتظار',i:'scale',sfx:'stone',m:'tip',idle:'rock',c:'#38BDF8',dx:-70,dy:0},
+ {id:'ghayba',t:'شؤونه في الغيبة',s:'الصغرى والكبرى',i:'veil',sfx:'wind',m:'drift',idle:'veil',c:'#9fb3c8',dx:70,dy:0},
+ {id:'tajil',t:'أسباب التعجيل',s:'الإعداد وانتشار الظلم',i:'hourglass',sfx:'sand',m:'turn',idle:'sand',c:'#e0b050',dx:0,dy:-60},
+ {id:'alamat',t:'علامات آخر الزمان',s:'الحتمية والفتن والوقائع',i:'bolt',sfx:'stone',m:'jolt',idle:'flick',c:'#EF4444',dx:0,dy:60},
+ {id:'tawasul',t:'التواصل معه',s:'زيارة، رقعة، توسل، استغاثة',i:'hands',sfx:'water',m:'ripple',idle:'ripple',c:'#22C55E',dx:-60,dy:40},
+ {id:'zuhur',t:'دوره في الظهور',s:'مسار مسيرته بالخرائط',i:'route',sfx:'cloth',m:'march',idle:'route',c:'#7dd3c0',dx:60,dy:40},
+ {id:'mawaqi',t:'المواقع المتخصصة',s:'المصادر وروابطها',i:'globe',sfx:'key',m:'spin',idle:'orbit',c:'#38BDF8',dx:-50,dy:-50},
+ {id:'daftar',t:'دفتري',s:'ملاحظات وأسئلة وعلامات',i:'note',sfx:'wax',m:'stamp',idle:'bob',c:'#F2B632',dx:50,dy:-50},
+];
+const ICONS={
+ home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+ doors:'<rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/>',
+ search:'<circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/>',
+ note:'<path d="M5 3h11l3 3v15H5z"/><path d="M9 9h6M9 13h6M9 17h3"/>',
+ star:'<path d="M12 2l2.4 7.2H22l-6.1 4.5 2.3 7.3L12 16.5 5.8 21l2.3-7.3L2 9.2h7.6z"/>',
+ book:'<path d="M12 6c-2-1.6-5-2-8-2v15c3 0 6 .4 8 2 2-1.6 5-2 8-2V4c-3 0-6 .4-8 2z"/><path d="M12 6v15"/>',
+ pen:'<path d="M4 20l1-5L16 4l4 4L9 19z"/><path d="M14 6l4 4"/>',
+ shelf:'<path d="M4 3v18M20 3v18M4 21h16"/><path d="M8 7v14M12 5v16M16 8l-1.6 13"/>',
+ scale:'<path d="M12 3v18M7 21h10M4 7h16"/><path d="M4 7l-2.4 6h6L5.2 7M20 7l-2.4 6h6"/>',
+ veil:'<path d="M3 8c3-3 6-3 9 0s6 3 9 0M3 13c3-3 6-3 9 0s6 3 9 0M3 18c3-3 6-3 9 0s6 3 9 0"/>',
+ hourglass:'<path d="M6 3h12M6 21h12M7 3c0 6 10 6 10 12v0c0 2-1 3-1.5 3M17 3c0 6-10 6-10 12 0 2 1 3 1.5 3"/>',
+ bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+ hands:'<path d="M12 21c-5-3-8-6-8-10a4.5 4.5 0 018-3 4.5 4.5 0 018 3c0 4-3 7-8 10z"/>',
+ route:'<circle cx="6" cy="19" r="2.4"/><circle cx="18" cy="5" r="2.4"/><path d="M8 18h6a3 3 0 000-6H9a3 3 0 010-6h6.6"/>',
+ globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9c-3-3-4-6-4-9s1-6 4-9z"/>',
+ vol:'<path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 010 7"/>',
+ mute:'<path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9l5 6M21 9l-5 6"/>',
+ mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/>',
+ back:'<path d="M9 5l7 7-7 7"/>',
+ heart:'<path d="M12 21c-5-3-8-6-8-10a4.5 4.5 0 018-3 4.5 4.5 0 018 3c0 4-3 7-8 10z"/>',
+ mark:'<path d="M6 3h12v18l-6-4-6 4z"/>',
+ q:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 114 2c-1 .7-1.5 1.2-1.5 2.5M12 17h.01"/>',
+ link:'<path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v6H4V6h6"/>',
+ play:'<path d="M7 4l13 8-13 8z"/>',
+ stop:'<rect x="6" y="6" width="12" height="12" rx="2"/>',
+ x:'<path d="M6 6l12 12M18 6L6 18"/>',
+};
+const ic=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]||''}</svg>`;
+const SITES=[
+ {t:'مركز الدراسات التخصصية في الإمام المهدي',u:'https://m-mahdi.net',d:'الموقع المتخصص وإصداراته، ومنه كثير من كتب هذا التطبيق',q:'m-mahdi.net'},
+ {t:'ويكي شيعة',u:'https://ar.wikishia.net',d:'موسوعة إلكترونية لمدرسة أهل البيت',q:'ar.wikishia.net'},
+ {t:'مكتبة أهل البيت',u:'https://ablibrary.net',d:'مكتبة الكتب المصدرية ونصوصها',q:'ablibrary.net'},
+ {t:'مركز الأبحاث العقائدية',u:'https://www.aqaed.com',d:'الأسئلة والبحوث العقدية',q:'aqaed.com'},
+ {t:'شبكة رافد',u:'https://rafed.net',d:'مكتبة ودراسات',q:'rafed.net'},
+ {t:'شبكة الكفيل',u:'https://alkafeel.net',d:'العتبة العباسية المقدسة',q:'alkafeel.net'},
+];
