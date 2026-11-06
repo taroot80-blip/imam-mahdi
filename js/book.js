@@ -20,7 +20,7 @@ const Book=(()=>{
   }
   function buildPages(){
     const S=stage().getBoundingClientRect();dbl=isDbl();
-    const pw=(dbl?S.width/2:S.width)-52,ph=S.height-92;
+    const pw=(dbl?S.width/2:S.width)-52,ph=S.height-84;
     const body=item.text||item.summary||'';
     const paras=body.split(/\n\n+/).filter(Boolean);
     const sized=paginate(paras,pw,ph-0);
@@ -94,12 +94,14 @@ const Book=(()=>{
         <div class="bk-cover c-r"><i></i></div><div class="bk-cover c-l"><i></i></div>
       </div>
       <div class="bk-nav">
-        <button class="btn2 bk-next" data-sfx="tap">التالية</button>
-        <div class="bk-acts" id="bkActs"></div>
         <button class="btn2 bk-prev" data-sfx="tap">السابقة</button>
+        <div class="bk-acts" id="bkActs"></div>
+        <button class="btn2 bk-next" data-sfx="tap">التالية</button>
       </div></div>`;
     root.classList.toggle('dbl',isDbl());
-    buildPages();renderStatic();App.actions(root.querySelector('#bkActs'),it);
+    const ready=()=>{if(item!==it)return;buildPages();renderStatic()};
+    const F=document.fonts;(F&&F.load?Promise.race([F.load(`400 ${store.get('font',19)}px Amiri`,'بسم'),new Promise(r=>setTimeout(r,1500))]):Promise.resolve()).then(ready,ready);
+    App.actions(root.querySelector('#bkActs'),it);
     SFX.play('cover');
     requestAnimationFrame(()=>root.classList.add('opened'));
     if(!info.ok)root.querySelector('.bk-listen').title='لا يوجد صوت عربي مثبت في هذا الجهاز';

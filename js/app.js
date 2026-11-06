@@ -28,19 +28,19 @@ const App=(()=>{
   function closeSheet(){sheet.hidden=true;sheet.innerHTML=''}
 
   /* ---------- الرئيسية ---------- */
-  function dial(){const ticks=Array.from({length:60},(_,i)=>`<line class="t ${i%5?'':'b'}" x1="180" y1="10" x2="180" y2="${i%5?18:24}" transform="rotate(${i*6} 180 180)"/>`).join('');
-    const orbs=Array.from({length:12},(_,i)=>{const a=i*30*Math.PI/180;return `<circle class="o" cx="${(180+Math.sin(a)*142).toFixed(1)}" cy="${(180-Math.cos(a)*142).toFixed(1)}" r="3.4" style="--i:${i}"/>`}).join('');
+  function dial(){const ticks=Array.from({length:60},(_,i)=>`<line class="t ${i%5?'':'b'}" x1="180" y1="10" x2="180" y2="${i%5?15:20}" transform="rotate(${i*6} 180 180)"/>`).join('');
+    const orbs=Array.from({length:12},(_,i)=>{const a=i*30*Math.PI/180;return `<circle class="o" cx="${(180+Math.sin(a)*133).toFixed(1)}" cy="${(180-Math.cos(a)*133).toFixed(1)}" r="3.4" style="--i:${i}"/>`}).join('');
     return `<svg class="dial" viewBox="0 0 360 360" aria-hidden="true">
-      <defs><path id="rt" d="M180 180m-158 0a158 158 0 1 1 316 0a158 158 0 1 1 -316 0"/><linearGradient id="dg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe49a"/><stop offset="1" stop-color="#c58a1c"/></linearGradient></defs>
+      <defs><path id="rt" d="M180 180m-143 0a143 143 0 1 1 286 0a143 143 0 1 1 -286 0"/><linearGradient id="dg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe49a"/><stop offset="1" stop-color="#c58a1c"/></linearGradient></defs>
       <circle cx="180" cy="180" r="172" class="c1"/><g class="ring-t">${ticks}</g>
-      <g class="ring-a"><text class="rtx"><textPath href="#rt" startOffset="0">السلام عليك يا بقية الله في أرضه · السلام عليك يا ميثاق الله · السلام عليك يا وعد الله المضمون ·</textPath></text></g>
-      <g class="ring-b">${orbs}<circle cx="180" cy="180" r="142" class="c2"/></g>
-      <circle cx="180" cy="180" r="118" class="c3"/><circle cx="180" cy="180" r="118" class="c4" pathLength="60" id="secArc"/>
-      <g id="secHand"><circle cx="180" cy="62" r="4.5" fill="url(#dg)"/></g></svg>`}
+      <g class="ring-a"><text class="rtx" direction="rtl"><textPath href="#rt" startOffset="100%">السلام عليك يا بقية الله في أرضه · السلام عليك يا ميثاق الله · السلام عليك يا وعد الله المضمون · السلام عليك يا بقية الله في أرضه ·</textPath></text></g>
+      <g class="ring-b">${orbs}<circle cx="180" cy="180" r="133" class="c2"/></g>
+      <circle cx="180" cy="180" r="116" class="c3"/><circle cx="180" cy="180" r="116" class="c4" pathLength="60" id="secArc"/>
+      <g id="secHand"><circle cx="180" cy="64" r="4.5" fill="url(#dg)"/></g></svg>`}
   let ageMode=store.get('ageMode','y'),ageT=null;
   function ageTick(){const box=document.getElementById('ageBig');if(!box){clearInterval(ageT);return}const a=Age.age();
     const set=(id,v)=>{const e=document.getElementById(id);if(e&&e.textContent!==v)e.textContent=v};
-    if(ageMode==='y'){set('ageBig',ar(a.years));set('ageU','سنة هجرية');set('ageSub',`${months(a.months)} و${dayz(a.days)}`)}
+    if(ageMode==='y'){set('ageBig',new Intl.NumberFormat('ar-SA-u-nu-arab',{useGrouping:false}).format(a.years));set('ageU','سنة هجرية');set('ageSub',`${months(a.months)} و${dayz(a.days)}`)}
     if(ageMode==='d'){set('ageBig',ar(a.totalDays));set('ageU','يومًا');set('ageSub',`نحو ${ar(Math.floor(a.solarYears))} سنة شمسية`)}
     if(ageMode==='h'){set('ageBig',ar(a.totalHours));set('ageU','ساعة');set('ageSub','منذ فجر مولده')}
     if(ageMode==='m'){set('ageBig',ar(a.totalMinutes));set('ageU','دقيقة');set('ageSub','منذ فجر مولده')}
@@ -62,7 +62,7 @@ const App=(()=>{
       <div class="modes" role="group" aria-label="طريقة عرض العمر">${[['y','بالسنين'],['d','بالأيام'],['h','بالساعة'],['m','بالدقيقة']].map(([k,t])=>`<button data-a="${k}" class="${k===ageMode?'on':''}" data-sfx="tap">${t}</button>`).join('')}</div>
       <p class="hint">المس القرص لتخرج صفاته ووصفه</p></section>
     <section class="doors" aria-label="الأبواب">${DOORS.map(doorBtn).join('')}</section>`;
-    document.getElementById('core').onclick=()=>{location.hash='#/door/sifat'};
+    document.getElementById('core').onclick=e=>{e.currentTarget.classList.add('burst');setTimeout(()=>{location.hash='#/door/sifat'},300)};
     view.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>{ageMode=b.dataset.a;store.set('ageMode',ageMode);view.querySelectorAll('.modes button').forEach(x=>x.classList.toggle('on',x===b));ageTick()});
     wireSearch();ageTick();clearInterval(ageT);ageT=setInterval(ageTick,1000)}
   function doorsPage(){view.innerHTML=`<h1 class="ph">الأبواب</h1><section class="doors">${DOORS.map(doorBtn).join('')}</section>`}
@@ -146,7 +146,8 @@ const App=(()=>{
     view.classList.remove('in');void view.offsetWidth;view.classList.add('in')}
   function boot(){document.querySelectorAll('[data-i]').forEach(e=>e.innerHTML=ic(e.dataset.i));sndIcon();applyFont();
     document.getElementById('sndBtn').onclick=()=>{SFX.toggle();sndIcon();toast(SFX.on()?'الأصوات مفعّلة':'الأصوات مطفأة')};
-    addEventListener('hashchange',route);route();Splash.start(()=>{});
+    addEventListener('hashchange',route);route();
+    if(document.fonts&&document.fonts.load)document.fonts.load('400 19px Amiri','بسم').catch(()=>{});Splash.start(()=>{});
     if('serviceWorker'in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{})}
   return{boot,actions,toast};
 })();

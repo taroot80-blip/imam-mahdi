@@ -57,7 +57,7 @@ main.in{animation:viewIn .42s var(--out)}
 .ring-a{transform-origin:180px 180px;animation:rot 90s linear infinite reverse}
 .ring-b{transform-origin:180px 180px;animation:rot 60s linear infinite}
 @keyframes rot{to{transform:rotate(360deg)}}
-.rtx{fill:#e8c778;font:500 13.6px var(--head);letter-spacing:0}
+.rtx{fill:#e8c778;font:500 13px var(--head)}
 .o{fill:var(--gold);animation:oP 3.6s ease-in-out infinite;animation-delay:calc(var(--i)*.3s)}
 @keyframes oP{0%,70%,100%{opacity:.35}35%{opacity:1;filter:drop-shadow(0 0 5px var(--gold))}}
 #secHand{transform-origin:180px 180px;transition:transform .5s var(--spring)}
@@ -213,7 +213,7 @@ textarea{width:100%;font:400 16px/1.7 var(--body);color:inherit;background:rgba(
 .c-r{right:-4px;transform-origin:right center}.c-l{left:-4px;transform-origin:left center}
 #book.opened .c-r{transform:rotateY(-165deg);opacity:0}#book.opened .c-l{transform:rotateY(165deg);opacity:0}
 .bk-spine{position:absolute;top:0;bottom:0;left:50%;width:0;display:none}
-.bk-nav .btn2{min-width:92px}
+.bk-nav .btn2{min-width:0;padding:8px 12px}.bk-acts{gap:5px}.bk-acts .ic{width:40px;height:44px}@media(min-width:500px){.bk-nav .btn2{min-width:92px}.bk-acts .ic{width:46px}}
 /* الرقعة */
 .ruqa{display:grid;gap:10px;margin-bottom:14px}
 .rq-sheet{position:relative;z-index:2;padding:16px;color:#2a1a0c;background:#d8bd8c url(../assets/papyrus.webp);box-shadow:0 8px 20px #000a,inset 0 0 40px rgba(90,55,15,.4);transition:transform .8s var(--io),opacity .5s}
@@ -292,3 +292,7 @@ textarea{width:100%;font:400 16px/1.7 var(--body);color:inherit;background:rgba(
 @keyframes gate{from{transform:scale(.55);opacity:1}to{transform:scale(1.25);opacity:0}}
 .gate .sp-gate{display:grid}.gate .sp-skip{display:none}
 @media(prefers-reduced-motion:reduce){.ring-t,.ring-a,.ring-b,.d-face:before,[data-idle] .d-ic,.sp-sparks i{animation:none!important}}
+
+.core:after{content:"";position:absolute;inset:18%;border-radius:50%;background:radial-gradient(circle,rgba(255,226,150,.9),rgba(242,182,50,.3) 50%,transparent 72%);opacity:0;pointer-events:none}
+.core.burst{animation:cb .3s var(--out) forwards}.core.burst:after{animation:cf .3s ease-out}
+@keyframes cb{to{transform:scale(1.12);opacity:.25}}@keyframes cf{0%{opacity:0;transform:scale(.5)}40%{opacity:1}100%{opacity:0;transform:scale(2.2)}}
