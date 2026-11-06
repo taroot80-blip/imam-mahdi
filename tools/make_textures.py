@@ -33,5 +33,5 @@ papyrus(640,(226,201,150),(170,134,82),'assets/papyrus.webp')
 papyrus(640,(36,62,48),(14,30,22),'assets/papyrus-green.webp')
 im=Image.open('assets/splash.webp').convert('RGB').resize((884,1632))
 bg=im.filter(ImageFilter.GaussianBlur(4)).resize((720,1330))
-a=np.asarray(bg,float)*np.array([1.0,.86,.66])*.36   # تدفئة وتعتيم
+a=np.asarray(bg,float)*np.array([1.0,.86,.66])*.55   # تدفئة وتعتيم
 Image.fromarray(a.astype('uint8')).save('assets/bg.webp',quality=55,method=6)
