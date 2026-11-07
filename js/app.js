@@ -58,22 +58,23 @@ const App=(()=>{
     m.onclick=()=>{const r=new SR();r.lang='ar-KW';r.interimResults=true;m.classList.add('on');toast('تكلّم الآن');
       r.onresult=e=>{const t=[...e.results].map(x=>x[0].transcript).join('');f.q.value=t;if(e.results[e.results.length-1].isFinal){m.classList.remove('on');location.hash='#/search/'+encodeURIComponent(t.trim())}};
       r.onerror=e=>{m.classList.remove('on');toast(e.error==='not-allowed'?'اسمح للمتصفح باستعمال الميكروفون':'لم أسمع بوضوح، حاول مجددًا')};r.onend=()=>m.classList.remove('on');r.start()}}
+const rawdaBanner=()=>`<a class="rawda-b" href="#/rawda" data-sfx="curtain" aria-label="روضة الانتظار للبراعم"><i class="rb-cur l"></i><i class="rb-cur r"></i><span class="rb-ic">${ic('kids')}</span><span class="rb-t"><b>روضة الانتظار</b><small>للبراعم من ٣ إلى ١٢ سنة: ألعاب وقصص ورسوم</small></span>${['#22C55E','#F2B632','#38BDF8','#F472B6','#A78BFA'].map((c,i)=>`<i class="rb-dot" style="--c:${c};--i:${i}"></i>`).join('')}</a>`;
   function home(){view.innerHTML=`${searchBar()}
     <section class="hero"><button class="core" id="core" aria-label="صفاته ووصفه" data-sfx="ember">${dial()}
       <span class="age"><small>عمره الشريف</small><b id="ageBig">—</b><i id="ageU"></i><em id="ageSub"></em><span id="ageClock" class="clk"></span></span></button>
       <div class="modes" role="group" aria-label="طريقة عرض العمر">${[['y','بالسنين'],['d','بالأيام'],['h','بالساعة'],['m','بالدقيقة']].map(([k,t])=>`<button data-a="${k}" class="${k===ageMode?'on':''}" data-sfx="tap">${t}</button>`).join('')}</div>
-      <p class="hint">المس القرص لتخرج صفاته ووصفه</p></section>
+      <p class="hint">المس القرص لتخرج صفاته ووصفه</p></section>${rawdaBanner()}
     <section class="doors" aria-label="الأبواب">${DOORS.map(doorBtn).join('')}</section>`;
     document.getElementById('core').onclick=e=>{e.currentTarget.classList.add('burst');setTimeout(()=>{location.hash='#/door/sifat'},300)};
     view.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>{ageMode=b.dataset.a;store.set('ageMode',ageMode);view.querySelectorAll('.modes button').forEach(x=>x.classList.toggle('on',x===b));ageTick()});
     wireSearch();ageTick();clearInterval(ageT);ageT=setInterval(ageTick,1000)}
-  function doorsPage(){view.innerHTML=`<h1 class="ph">الأبواب</h1><section class="doors">${DOORS.map(doorBtn).join('')}</section>`}
+  function doorsPage(){view.innerHTML=`<h1 class="ph">الأبواب</h1>${rawdaBanner()}<section class="doors">${DOORS.map(doorBtn).join('')}</section>`}
 
   /* ---------- الأبواب ---------- */
   const head=d=>`<a class="back" href="#/" data-sfx="close">${ic('back')} الرئيسية</a><header class="dh" style="--c:${d.c}"><span class="d-ic">${ic(d.i)}</span><div><h1>${d.t}</h1><p>${d.s}</p></div></header>`;
   const card=(it,i)=>`<a class="it" href="#/item/${it.id}" style="--i:${i}" data-sfx="paper"><b>${esc(it.title)}</b>${it.witness?`<small>${esc(it.witness)}</small>`:''}<span class="grade g-${esc(it.grade)}">${esc(gradeName(it.grade))}</span></a>`;
   const pending=t=>`<div class="pend"><b>${esc(t)}</b><span>قيد التوثيق</span></div>`;
-  const PLAN={sifat:['ولادته','أسماؤه وألقابه','صفاته ووصفه'],liqaat:['مع الرواة','مع العلماء','مع الشعراء','مع العامة'],ghayba:['في الغيبة الصغرى','في الغيبة الكبرى'],tajil:['الأسباب الإيجابية: الإعداد','الأسباب السلبية: انتشار الظلم والفساد وأنواعه'],aqwal:['توقيعاته','أقواله وما أُثر عنه'],alamat:['العلامات الحتمية','علامات أخرى','الفتن والوقائع'],tawasul:['الزيارة','طلب لقائه','كتابة الرقعة','التوسل به','دعاء الندبة','دعاء العهد','الاستغاثة به','التضرع له'],zuhur:['مسيرة الظهور','أدواره']};
+  const PLAN={shubuhat:['العدل الإلهي والغيبة','التعجيل والتأجيل','البداء والعلامات الحتمية','التوقيت وإسقاط العلامات','طول العمر','الانتفاع به في غيبته','ولادته ووجوده'],sifat:['ولادته','أسماؤه وألقابه','صفاته ووصفه'],liqaat:['مع الرواة','مع العلماء','مع الشعراء','مع العامة'],ghayba:['في الغيبة الصغرى','في الغيبة الكبرى'],tajil:['الأسباب الإيجابية: الإعداد','الأسباب السلبية: انتشار الظلم والفساد وأنواعه'],aqwal:['توقيعاته','أقواله وما أُثر عنه'],alamat:['العلامات الحتمية','علامات أخرى','الفتن والوقائع'],tawasul:['الزيارة','طلب لقائه','كتابة الرقعة','التوسل به','دعاء الندبة','دعاء العهد','الاستغاثة به','التضرع له'],zuhur:['مسيرة الظهور','أدواره']};
   function door(id){const d=DOORS.find(x=>x.id===id);if(!d)return notFound();
     if(id==='kutub')return kutub(d);if(id==='mawaqi')return mawaqi(d);if(id==='daftar')return daftar();
     const secs=[...new Set([...(PLAN[id]||[]),...sections(id)])];
@@ -142,10 +143,10 @@ const App=(()=>{
   const notFound=()=>{view.innerHTML=`<div class="pend"><b>لم نجد هذه الصفحة</b><a class="btn" href="#/">عُد إلى الرئيسية</a></div>`};
   const applyFont=()=>document.documentElement.style.setProperty('--read',store.get('font',19)+'px');
   const sndIcon=()=>{document.getElementById('sndBtn').innerHTML=ic(SFX.on()?'vol':'mute')};
-  function route(){const h=location.hash.slice(1)||'/',[,a,b]=h.split('/');TTS.cancel();closeSheet();if(Book.isOpen()&&!(a==='item'&&(byId(b)||{}).door==='liqaat'))Book.close();
+  function route(){const h=location.hash.slice(1)||'/',[,a,b,c]=h.split('/');if(a!=='rawda')Rawda.leave();TTS.cancel();closeSheet();if(Book.isOpen()&&!(a==='item'&&(byId(b)||{}).door==='liqaat'))Book.close();
     clearInterval(ageT);scrollTo(0,0);
     document.querySelectorAll('.bot a').forEach(x=>x.classList.toggle('on',x.dataset.n===(a||'home')));document.querySelector('.labbar').classList.toggle('on',a==='lab');
-    if(!a)home();else if(a==='doors')doorsPage();else if(a==='door')door(b);else if(a==='item')item(b);else if(a==='search')search(decodeURIComponent(b||''));else if(a==='daftar')daftar();else if(a==='settings')settings();else if(a==='lab')LabUI.page(decodeURIComponent(b||''));else notFound();
+    if(!a)home();else if(a==='doors')doorsPage();else if(a==='door')door(b);else if(a==='item')item(b);else if(a==='search')search(decodeURIComponent(b||''));else if(a==='daftar')daftar();else if(a==='settings')settings();else if(a==='lab')LabUI.page(decodeURIComponent(b||''));else if(a==='rawda')Rawda.page(b,c);else notFound();
     view.classList.remove('in');void view.offsetWidth;view.classList.add('in')}
   function boot(){document.querySelectorAll('[data-i]').forEach(e=>e.innerHTML=ic(e.dataset.i));sndIcon();applyFont();
     document.getElementById('sndBtn').onclick=()=>{SFX.toggle();sndIcon();toast(SFX.on()?'الأصوات مفعّلة':'الأصوات مطفأة')};

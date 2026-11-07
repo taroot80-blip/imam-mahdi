@@ -1,4 +1,4 @@
-const V='mastoor-4';
+const V='mastoor-5';
 self.addEventListener('install',e=>{self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==V).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
 // الشبكة أولًا ليصل التحديث، والمخزون عند انقطاع الإنترنت

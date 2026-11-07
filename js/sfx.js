@@ -31,6 +31,15 @@ const SFX=(()=>{
     mic:()=>{thud(0,190,.06,.22);noise(.06,.06,2200,1200,.1)},
     cover:()=>{thud(0,84,.26,.5);noise(0,.5,420,1500,.13,'bandpass',.7,1)},
     save:()=>{noise(0,.05,3400,2200,.12);thud(.03,140,.08,.26)},
+    // للشبهات: تشقق حجر ثم تساقط
+    crack:()=>{noise(0,.05,3800,900,.3,'bandpass',3);thud(.03,90,.12,.42);for(let i=0;i<5;i++)noise(.12+i*.05,.03,2400+i*300,1200,.1,'bandpass',4)},
+    // لروضة الانتظار: ستائر تنفرج، فرقعة فقاعة، لمعان، جرس خفيف، فوز
+    curtain:()=>{noise(0,1.1,300,1800,.16,'bandpass',.6,.6);noise(.3,.9,1800,500,.1,'bandpass',.6,.8)},
+    pop:()=>{drop(0,520,.18)},
+    leafk:()=>{noise(0,.18,1600,4200,.12,'bandpass',.9,1.2)},
+    sparkle:()=>{for(let i=0;i<7;i++)noise(i*.04,.03,5200+Math.random()*2400,4200,.09,'bandpass',6)},
+    chimek:()=>{drop(0,880,.1);drop(.09,1320,.08);drop(.18,1760,.06)},
+    win:()=>{drop(0,660,.16);drop(.1,880,.14);drop(.2,1320,.12);for(let i=0;i<5;i++)noise(.25+i*.04,.03,6000,4800,.06,'bandpass',6)},
   };
   return {play(k){if(!on())return;try{P[k]&&P[k]()}catch(e){}},on,toggle(){store.set('sfx',!on());if(on())P.tap();return on()},unlock(){ac()}};
 })();

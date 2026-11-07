@@ -2,7 +2,7 @@
 # يدمج research/*.json في data/content.js، ويرفض ما ينقصه المصدر أو الرابط
 import json,glob,re,sys
 GR={'tawqi','riwaya','thiqa','kutub','dua','bahth','istinas'}
-DOORS={'sifat','liqaat','aqwal','bahth','ghayba','tajil','alamat','tawasul','zuhur'}
+DOORS={'sifat','liqaat','aqwal','bahth','shubuhat','ghayba','tajil','alamat','tawasul','zuhur'}
 out=[];rej=[];seen=set()
 for f in sorted(glob.glob('research/[a-z].json')+glob.glob('research/b[0-9].json')+glob.glob('research/e-*.json')):
     for it in json.load(open(f,encoding='utf8')):
