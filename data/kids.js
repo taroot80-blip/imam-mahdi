@@ -126,7 +126,12 @@ const KIDS={
     ],
   },
   /* فيديوهات الكرتون: تُضاف بعد اعتماد المشرف لقنواتها */
-  videos:[],
+  videos:[
+    {t:'قصص الإمام المهدي للأطفال',ch:'الطفل الموالي · قائمة من ٥٠ قصة',u:'https://www.youtube.com/playlist?list=PLdHwqJ8XTu-bulT6DfqBMuS79tw7qSTvM'},
+    {t:'الإمام المهدي في قناة هدهد',ch:'قناة هدهد الفضائية · كرتون وأناشيد',u:'https://www.youtube.com/@hodhodchannel/search?query=%D8%A7%D9%84%D8%A5%D9%85%D8%A7%D9%85%20%D8%A7%D9%84%D9%85%D9%87%D8%AF%D9%8A'},
+    {t:'الإمام المهدي في قناة طه',ch:'قناة طه للأطفال',u:'https://www.youtube.com/@tahakidstv/search?query=%D8%A7%D9%84%D8%A5%D9%85%D8%A7%D9%85%20%D8%A7%D9%84%D9%85%D9%87%D8%AF%D9%8A'},
+    {t:'وليد الكعبة: أسئلة تعليمية للأطفال',ch:'قناة المهدي',u:'https://www.youtube.com/watch?v=KD4Y5ai-Xek'},
+  ],
   /* صفحات التلوين: id، عنوان، رسم SVG بخطوط مغلقة */
   color:[
     {id:'shams',t:'الشمس خلف السحاب',note:'كالانتفاع بالشمس إذا غيّبها السحاب'},
