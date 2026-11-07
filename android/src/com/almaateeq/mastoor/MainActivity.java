@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
     private TextToSpeech tts;
     private boolean ttsReady;
     private final List<Voice> arVoices = new ArrayList<Voice>();
-    private String pendingSave;
+    private byte[] pendingSave;
     private ValueCallback<Uri[]> fileCb;
 
     @Override
@@ -174,11 +174,11 @@ public class MainActivity extends Activity {
             if (result == RESULT_OK && data != null && data.getData() != null && pendingSave != null) {
                 try {
                     OutputStream o = getContentResolver().openOutputStream(data.getData());
-                    if (o != null) { o.write(pendingSave.getBytes("UTF-8")); o.close(); ok = true; }
+                    if (o != null) { o.write(pendingSave); o.close(); ok = true; }
                 } catch (IOException ignored) { }
             }
             pendingSave = null;
-            if (ok) js("window.App&&App.toast('حُفظت النسخة')");
+            if (ok) js("window.App&&App.toast('حُفظ الملف')");
         } else if (rc == RC_PICK && fileCb != null) {
             Uri[] r = null;
             if (result == RESULT_OK && data != null && data.getData() != null) r = new Uri[] { data.getData() };
@@ -259,10 +259,33 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public void saveText(String name, String text) {
-            pendingSave = text;
+            try { startSave(name, "application/json", text.getBytes("UTF-8")); } catch (java.io.UnsupportedEncodingException ignored) { }
+        }
+
+        /** حفظ ملف بأي نوع (صورة PNG، SVG، CSV، تقرير HTML) من نص base64. */
+        @JavascriptInterface
+        public void saveFile(String name, String mime, String b64) {
+            try { startSave(name, mime, android.util.Base64.decode(b64, android.util.Base64.DEFAULT)); }
+            catch (IllegalArgumentException e) { js("window.App&&App.toast('تعذّر حفظ الملف')"); }
+        }
+
+        /** طباعة الصفحة الحالية أو حفظها PDF عبر خدمة الطباعة في أندرويد. */
+        @JavascriptInterface
+        public void printPage(final String title) {
+            runOnUiThread(new Runnable() {
+                @Override public void run() {
+                    android.print.PrintManager pm = (android.print.PrintManager) getSystemService(PRINT_SERVICE);
+                    if (pm == null) return;
+                    pm.print(title, web.createPrintDocumentAdapter(title), new android.print.PrintAttributes.Builder().build());
+                }
+            });
+        }
+
+        private void startSave(String name, String type, byte[] data) {
+            pendingSave = data;
             Intent i = new Intent(Intent.ACTION_CREATE_DOCUMENT);
             i.addCategory(Intent.CATEGORY_OPENABLE);
-            i.setType("application/json");
+            i.setType(type);
             i.putExtra(Intent.EXTRA_TITLE, name);
             try {
                 startActivityForResult(i, RC_SAVE);

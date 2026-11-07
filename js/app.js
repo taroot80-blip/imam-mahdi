@@ -124,6 +124,7 @@ const App=(()=>{
       ${dr.length?`<div class="its">${dr.map((d,i)=>`<a class="it" href="#/door/${d.id}" style="--i:${i}"><b>${d.t}</b><small>باب</small></a>`).join('')}</div>`:''}
       ${items.length?`<div class="its">${items.map(card).join('')}</div>`:''}
       ${bks.length?`<h2 class="sh2">كتب</h2><div class="its">${bks.map((b,i)=>`<button class="it" data-b="${b.n}" style="--i:${i%10}"><b>${esc(b.t)}</b><small>${esc(b.a)}</small></button>`).join('')}</div>`:''}
+      <a class="it lab-link" href="#/lab/${encodeURIComponent('قارن ذكر «'+q+'» بين الكتب القديمة والمعاصرة')}" data-sfx="ember"><b>${ic('lab')} حلّل «${esc(q)}» في البحوث والمقارنات</b><small>رسوم ومقارنات بين الكتب القديمة والمتأخرة والمعاصرة</small></a>
       <h2 class="sh2">ابحث على الشبكة</h2><div class="wls">${webLinks(q)}</div>`;
     view.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>bookSheet(BOOKS[b.dataset.b-1]))}
   /* ---------- الإعدادات ---------- */
@@ -143,8 +144,8 @@ const App=(()=>{
   const sndIcon=()=>{document.getElementById('sndBtn').innerHTML=ic(SFX.on()?'vol':'mute')};
   function route(){const h=location.hash.slice(1)||'/',[,a,b]=h.split('/');TTS.cancel();closeSheet();if(Book.isOpen()&&!(a==='item'&&(byId(b)||{}).door==='liqaat'))Book.close();
     clearInterval(ageT);scrollTo(0,0);
-    document.querySelectorAll('.bot a').forEach(x=>x.classList.toggle('on',x.dataset.n===(a||'home')));
-    if(!a)home();else if(a==='doors')doorsPage();else if(a==='door')door(b);else if(a==='item')item(b);else if(a==='search')search(decodeURIComponent(b||''));else if(a==='daftar')daftar();else if(a==='settings')settings();else notFound();
+    document.querySelectorAll('.bot a').forEach(x=>x.classList.toggle('on',x.dataset.n===(a||'home')));document.querySelector('.labbar').classList.toggle('on',a==='lab');
+    if(!a)home();else if(a==='doors')doorsPage();else if(a==='door')door(b);else if(a==='item')item(b);else if(a==='search')search(decodeURIComponent(b||''));else if(a==='daftar')daftar();else if(a==='settings')settings();else if(a==='lab')LabUI.page(decodeURIComponent(b||''));else notFound();
     view.classList.remove('in');void view.offsetWidth;view.classList.add('in')}
   function boot(){document.querySelectorAll('[data-i]').forEach(e=>e.innerHTML=ic(e.dataset.i));sndIcon();applyFont();
     document.getElementById('sndBtn').onclick=()=>{SFX.toggle();sndIcon();toast(SFX.on()?'الأصوات مفعّلة':'الأصوات مطفأة')};

@@ -41,6 +41,14 @@ const ICONS={
  play:'<path d="M7 4l13 8-13 8z"/>',
  stop:'<rect x="6" y="6" width="12" height="12" rx="2"/>',
  x:'<path d="M6 6l12 12M18 6L6 18"/>',
+ lab:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/><circle cx="4" cy="7" r="1.6"/><circle cx="10" cy="2.6" r="1"/><circle cx="16" cy="10" r="1.6"/><path d="M5.3 6.2L9 3.4M11 3.6l3.9 5.4"/>',
+ spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
+ expand:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+ image:'<rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',
+ download:'<path d="M12 3v12M7 10l5 5 5-5M4 20h16"/>',
+ print:'<path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
+ table:'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14h18M9 9v11"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
 };
 const ic=n=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]||''}</svg>`;
 const SITES=[
