@@ -67,7 +67,7 @@ const Lab=(()=>{
   const GR=['tawqi','riwaya','dua','thiqa','bahth','kutub','istinas'];
   function group(list,key,val){const o={};list.forEach(x=>{const k=key(x);if(k==null)return;o[k]=(o[k]||0)+(val?val(x):1)});return o}
   // units: نصوص من المتون الكاملة (Corpus) تُضاف إلى نصوص التطبيق أو تحل محلها
-  function analyze({terms=[],scope='all',units:ext=null,withApp=true}={}){const {units,books}=build();
+  function analyze({terms=[],scope='all',units:ext=null,withApp=true,poolN=null}={}){const {units,books}=build();
     const base=ext?(withApp?ext.concat(units):ext):units;
     const pool=scope==='all'?base:base.filter(u=>u.era===scope);
     const T=terms.map(t=>({label:t,n:N(t)})).filter(t=>t.n);
@@ -79,18 +79,56 @@ const Lab=(()=>{
         bySection:group(hits,h=>(h.u.corpus?h.u.book:h.u.door)+'›'+h.u.section,h=>h.c),
         byType:group(hits,h=>h.u.stype,h=>h.c),eraGrade:group(hits,h=>h.u.era+'›'+h.u.grade),bookGrade:group(hits,h=>h.u.book+'›'+h.u.grade),
         byBeh:group(hits.filter(h=>h.u.corpus&&BEH.has(h.u.bk)),h=>h.u.book+'›'+(h.u.beh?'1':'0')),
+        byBab:group(hits.filter(h=>h.u.bab),h=>h.u.book+' · '+h.u.bab,h=>h.c),byVia:group(hits.filter(h=>h.u.via),h=>h.u.via,h=>h.c),byGroup:group(hits,h=>h.u.g||'app',h=>h.c),
+        ...chains(hits),
         corpusHits:hits.filter(h=>h.u.corpus).length,titleBooks:bt}});
     const ids=new Set();per.forEach(p=>p.hits.forEach(h=>ids.add(h.u.id)));
-    return{terms:T.map(t=>t.label),scope,per,pool:pool.length,matched:ids.size,cooc:cooc(per),gs:scheme(per),corpus:!!ext,withApp:!ext||withApp}}
+    return{terms:T.map(t=>t.label),scope,per,pool:(poolN!=null?poolN+(ext&&withApp?units.length:0):pool.length),matched:ids.size,cooc:cooc(per),gs:scheme(per),corpus:!!ext,withApp:!ext||withApp}}
   // كتب نقل الموقع تقييم البهبودي لأحاديثها
   const BEH=new Set(['kafi','faqih','tahdhib']);
+  /* ---------- الأسانيد: استخراج تقريبي لرجال السند والمعصوم المروي عنه ---------- */
+  const IMAMS=[[/^(ابي|ابا|ابو) عبد الله( جعفر بن محمد)?( الصادق)?$|^جعفر بن محمد( الصادق)?$|^الصادق$/,'الإمام الصادق'],
+    [/^(ابي|ابا|ابو) جعفر الثاني$|^الجواد$|^ابي جعفر محمد بن علي الرضا$/,'الإمام الجواد'],
+    [/^(ابي|ابا|ابو) جعفر( محمد بن علي)?( الباقر)?$|^الباقر$/,'أبو جعفر (الباقر غالبًا)'],
+    [/^(ابي|ابا|ابو) ابراهيم$|^موسي بن جعفر$|^العبد الصالح$|^ابي الحسن موسي$|^الكاظم$/,'الإمام الكاظم'],
+    [/^(ابي|ابا|ابو) الحسن الرضا$|^الرضا$|^علي بن موسي( الرضا)?$/,'الإمام الرضا'],
+    [/^(ابي|ابا|ابو) الحسن الثالث$|^الهادي$|^(ابي|ابا|ابو) الحسن العسكري$/,'الإمام الهادي'],
+    [/^(ابي|ابا|ابو) الحسن( الاول| الماضي)?$/,'أبو الحسن (الكاظم أو الرضا أو الهادي)'],
+    [/^(ابي|ابا|ابو) محمد( الحسن بن علي)?( العسكري)?$|^العسكري$/,'أبو محمد (العسكري غالبًا)'],
+    [/^علي بن الحسين$|^زين العابدين$|^السجاد$|^(ابي|ابا|ابو) محمد علي بن الحسين$/,'الإمام السجاد'],
+    [/^امير المومنين$|^علي بن ابي طالب$|^علي$/,'أمير المؤمنين'],[/^رسول الله$|^النبي$/,'النبي'],
+    [/^صاحب الزمان$|^القائم$|^صاحب الامر$|^الناحيه( المقدسه)?$/,'الإمام المهدي'],[/^الحسين بن علي$/,'الإمام الحسين'],[/^الحسن بن علي$/,'الإمام الحسن']];
+  const LEAD=/^(\d+ )?(غط|ني|ك|كا|يب|بص|ما|لي|جا|ع|ن|ب|سن|شي|فس|كش|جش|مع|ل|يد|ثو|ص|ج|كنز|مل|عم|يج|قب|ير)?( [^ ]+){0,4}? ?(حدثنا|حدثني|اخبرنا|اخبرني|روي|روي عن|وروي|و?باسناده|و?بالاسناد|قال)? ?/;
+  function cleanName(x){x=x.replace(/^(\d+ )+/,'').replace(/^(و|ف)?(حدثنا|حدثني|اخبرنا|اخبرني|روي|روي عن|عنه|و?باسناده عن|و?بهذا الاسناد|و?بالاسناد|قال|قالا|جميعا|عده من اصحابنا|جماعه)( |$)/g,'').replace(/ (جميعا|رفعه|مرسلا|عن بعض اصحابنا|وغيره|وغيرهما|قال|قالا|رحمه الله|رضي الله عنه)( .*)?$/,'').trim();
+    const w=x.split(' ');return w.length>=2&&w.length<=7&&w[0].length>2&&!/^(في|من|ما|ان|انه|لا|اذا|قد|كان|الكافي|الغيبه|كتاب)$/.test(w[0])&&!/الكافي|الغيبه|الامالي|اكمال|كمال الدين|العيون|البصاير|المحاسن|تفسير/.test(x)?w.slice(0,6).join(' '):null}
+  const CUT=/ (ع|عليه السلام|عليهما السلام|صلي الله|ص|قال|قالت|قالا|يقول|انه|انها|انهما|في قول|في قوله|مثله|نحوه|سالته|سالت|سمعت|سمعته|كتب|كتبت|في حديث|يرفعه|رفعه) /;
+  const KW=/(?:^| )(?:اخبرني|اخبرنا|حدثني|حدثنا|حدثه|منهم|باسناده|بالاسناد|بهذا الاسناد|عنه|روي|جماعه|عده من اصحابنا)(?: |$)/g;
+  function firstHead(x){let k=-1,m;KW.lastIndex=0;while((m=KW.exec(x)))k=m.index+m[0].length;if(k>=0)x=x.slice(k);
+    const w=x.trim().split(' '),b=w.indexOf('بن');if(b>0)return w.slice(b-1,b+6).join(' ');let out=w.slice(-6);while(out.length&&out[0]==='بن')out.shift();return out.join(' ')}
+  const AMBIG=/^(علي بن الحسين|الحسن بن علي|الحسين بن علي|جعفر بن محمد|موسي بن جعفر|علي بن موسي|علي)$/;
+  function chainOf(u){if(u.stype!=='hadith')return null;let s=u.body.slice(0,600);if(s.indexOf(' عن ')<0)return null;
+    s=s.replace(/^\d+ /,'');const seg=s.split(' عن ');if(seg.length<2)return null;
+    const names=[];let imam=null,ended=false;
+    for(let i=0;i<seg.length&&i<14;i++){let x=seg[i];const c=i?x.search(CUT):-1;let head=(c>0?x.slice(0,c):x).trim();
+      if(i===0)head=firstHead(head);
+      let hit=null;for(const [re,name] of IMAMS)if(re.test(head)){hit=name;break}
+      if(hit&&AMBIG.test(head)&&!(c>0&&/^ (ع|عليه السلام|عليهما السلام) /.test(x.slice(c,c+16))))hit=null;
+      if(hit){imam=hit;ended=true;break}
+      head.split(/ و(?=[^ ]+ (?:بن|ابن) )/).forEach(y=>{const n=cleanName(y);if(n&&n!=='عنه')names.push(n)});
+      if(c>0||(i&&head.split(' ').length>7)){ended=true;break}}
+    if(!names.length&&!imam)return null;
+    return{names,imam}}
+  function chains(hits){const nar={},im={};let withChain=0;
+    for(const h of hits){const c=h.u.chain!==undefined?h.u.chain:(h.u.chain=chainOf(h.u));if(!c)continue;withChain++;
+      new Set(c.names).forEach(n=>nar[n]=(nar[n]||0)+1);const k=c.imam||'غير مصرّح أو غير معصوم';im[k]=(im[k]||0)+1}
+    return{byNarr:nar,byImam:im,withChain}}
   // نظام الدرجات: درجات نقل نصوص التطبيق، وتقييم المجلسي لأحاديث الكافي
   const APPG={tawqi:'توقيع شريف',riwaya:'رواية في مصدر معتبر',thiqa:'عالم ثقة',kutub:'نقل كتب اللقاءات',dua:'دعاء مأثور',bahth:'بحث علمي',istinas:'للاستئناس'};
   const MAJ=[['sahih','صحيح','#22C55E'],['hasan','حسن','#14B8A6'],['muwathaq','موثق','#38BDF8'],['daif','ضعيف','#EF4444'],['majhul','مجهول','#FB923C'],['mursal','مرسل','#A78BFA'],['marfu','مرفوع','#F472B6'],['other','تقييم آخر','#E0B050'],['none','بلا تقييم','#6b5d4a']];
   function scheme(per){const ks=new Set();(per||[]).forEach(p=>Object.keys(p.byGrade).forEach(k=>ks.add(k)));
-    const order=[...GR,...MAJ.map(m=>'M'+m[0])],keys=per?order.filter(k=>ks.has(k)):GR.slice();
+    const order=[...GR,...MAJ.map(m=>'M'+m[0]),'N'],keys=per?order.filter(k=>ks.has(k)):GR.slice();
     const mj=k=>MAJ.find(m=>'M'+m[0]===k)||MAJ[8];
-    return{keys,name:k=>k[0]==='M'?(k==='Mnone'?'حديث بلا تقييم للمجلسي':mj(k)[1]+' عند المجلسي'):(APPG[k]||k),short:k=>k[0]==='M'?mj(k)[1]:(APPG[k]||k),color:k=>k[0]==='M'?mj(k)[2]:GRADE_C[k]}}
+    return{keys,name:k=>k==='N'?'كتاب غير حديثي':k[0]==='M'?(k==='Mnone'?'حديث بلا تقييم للمجلسي':mj(k)[1]+' عند المجلسي'):(APPG[k]||k),short:k=>k==='N'?'غير حديثي':k[0]==='M'?mj(k)[1]:(APPG[k]||k),color:k=>k==='N'?'#5b4f40':k[0]==='M'?mj(k)[2]:GRADE_C[k]}}
   // الكلمات المصاحبة للمصطلح في النصوص نفسها
   // أعلام أسانيد شائعة وأدوات لا تفيد في معرفة سياق القضية
   const NAMES=new Set('علي محمد احمد الحسن الحسين جعفر ابراهيم اسحاق يعقوب موسي عثمان سعيد عبد عبيد حدثنا حدثني اخبرنا اخبرني روي رواه فقال قالوا وقال واما فاما وانا وان فلما لما كنت كان كانوا وكان يقول يقال اليه عليه عليهم الينا ابيه ابوه ابيه رجل الرجل شيء فقد وقد لقد قلنا ذكر يوم سنه فهو احد كما وجه يكن فانك فمن ليس ولكن لكن غير مثل اني انه فانه منكم عليكم اليكم بكم انكم انهم وهم انما ايضا هناك هنا كذلك جميع اكثر الامر امر'.split(' '));
@@ -115,15 +153,16 @@ const Lab=(()=>{
     ['book',/كل كتاب|كتاب كتاب|المصادر|مصدر|في الكتب|بين الكتب|الكتب عموما|كتب/],
     ['door',/الابواب|باب|موضوعات|اقسام/],
     ['cloud',/مصاحب|يقترن|يرتبط|سياق|الكلمات/],
+    ['rijal',/رواه|الرواه|السند|الاسانيد|اسناد|اسانيد|رجال السند|المروي عنه/],
   ];
   const DROP=new Set(('قارن قارني مقارنه بين ذكر ذكره ذكرها عدد مرات مره كم كمي اعرض اظهر ارسم رسم بياني بيانيه وضح بين لي ابحث بحث حلل تحليل احص احصاء احصائيه نسبه '+
     'الكتب كتب كتاب الكتاب كل المصادر المصدر مصادر القديمه قديمه القديم المتقدمه المتقدمين المعاصره معاصره المعاصر المتاخره متاخره المتاخرين العصور عصور عصر عموما عامه '+
     'ما ماذا مدي مدى هل كيف اين متي لماذا وما وهل في من على عن الى الي بين و او ام ثم مع حسب حول عند منها فيها فيه به لها له ذلك هذا هذه التي الذي '+
     'ثبوت اعتبار اعتباريه توثيق درجه درجات معتبر معتبره صحه امر شيء قضيه مساله موضوع اهل البيت الامام المهدي عليه السلام عجل الله فرجه الشريف '+
-    'خريطه ذهنيه ذهني شجره مفاهيم قرن القرون الزمن تطور تاريخيا زمني الابواب باب موضوعات اقسام مصاحبه المصاحبه الكلمات سياق يقترن يرتبط روايات الروايات النصوص نصوص فقط وحدها وغيرها غيرها الاربعه اربعه امهات البحار بحار الانوار الكافي وحده التطبيق المفهرسه الحديثيه الحديث الاحاديث احاديث عبر خلال لدي ورود وروده ورد يرد تكرار تكرر').split(' '));
+    'خريطه ذهنيه ذهني شجره مفاهيم قرن القرون الزمن تطور تاريخيا زمني الابواب باب موضوعات اقسام مصاحبه المصاحبه الكلمات سياق يقترن يرتبط روايات الروايات النصوص نصوص فقط وحدها وغيرها غيرها الاربعه اربعه امهات البحار بحار الانوار الكافي وحده مكتبه الرجال رجال الرواه رواه السند اسانيد الاسانيد اسناد المروي المهدويه التطبيق المفهرسه الحديثيه الحديث الاحاديث احاديث عبر خلال لدي ورود وروده ورد يرد تكرار تكرر').split(' '));
   // نطاق المصادر من نص السؤال
   function srcOf(n){if(/الكتب الاربعه|امهات الكتب|الاصول الاربعه/.test(n))return'four';if(/بحار الانوار|البحار/.test(n))return'bihar';if(/كتب الغيبه/.test(n))return'ghayba';
-    if(/في الكافي|الكافي وحده|كتاب الكافي/.test(n))return'kafi';if(/كل الكتب|جميع الكتب|الكتب كلها|الكتب المفهرسه/.test(n))return'corpus';if(/نصوص التطبيق/.test(n))return'app';return null}
+    if(/في الكافي|الكافي وحده|كتاب الكافي/.test(n))return'kafi';if(/مكتبه الامام المهدي|مكتبه المهدي|كتب المهدويه|الكتب المهدويه|المولفات المهدويه/.test(n))return'mahdawi';if(/كتب الرجال|في الرجال|علم الرجال/.test(n))return'rijal';if(/كتب الحديث/.test(n))return'hadith';if(/المكتبه كلها|كل الكتب|جميع الكتب|الكتب كلها|الكتب المفهرسه/.test(n))return'corpus';if(/نصوص التطبيق/.test(n))return'app';return null}
   function parse(q){const raw0=String(q||'').trim(),n=N(raw0),src=srcOf(n);
     const raw=raw0.replace(/(في\s+)?كتب\s+الغيبة/g,' ').replace(/(في\s+)?(كتاب\s+)?الكافي(\s+وحده)?/g,' ');const views=INTENT.filter(([,r])=>r.test(n)).map(([k])=>k);
     let scope='all';if(/(القديمه|المتقدمه)\s*(فقط|وحدها)|في الكتب (القديمه|المتقدمه)(?! و)/.test(n)&&!/معاصر|متاخر/.test(n))scope='q';
@@ -149,6 +188,6 @@ const Lab=(()=>{
 
   const GRADE_C={tawqi:'#F2B632',riwaya:'#22C55E',dua:'#A78BFA',thiqa:'#14B8A6',bahth:'#38BDF8',kutub:'#FB923C',istinas:'#F472B6'};
   const KIND={m:'موسوعية',k:'مجلد كبير',b:'كتاب',r:'كتيب'};
-  return{build,analyze,scheme,overview,parse,refine,snippet,countIn,N,ERA,GR,GRADE_C,KIND,TYPE,eraOf,srcMeta,parseDeath}
+  return{build,analyze,scheme,overview,chainOf,parse,refine,snippet,countIn,N,ERA,GR,GRADE_C,KIND,TYPE,eraOf,srcMeta,parseDeath}
 })();
 if(typeof module!=='undefined')module.exports=Lab;

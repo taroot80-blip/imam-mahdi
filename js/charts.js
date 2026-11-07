@@ -81,7 +81,7 @@ ${body}</svg>`}
     cols.forEach((c,j)=>{g+=T(W-lw-20-j*cw-cw/2,top+12,cut(c,Math.max(6,Math.floor(cw/8))),{a:'m',size:12,fill:MUT})});
     rows.forEach((rw,i)=>{const y=top+22+i*ch;g+=T(W-20,y+21,cut(rw,Math.floor(lw/7.5)),{size:13});
       cols.forEach((c,j)=>{const v=M[i][j]||0,x=W-lw-20-(j+1)*cw,t=v/max;
-        g+=`<rect class="cg-pop" style="--i:${i*cols.length+j}" x="${f1(x+2)}" y="${y+2}" width="${f1(cw-4)}" height="${ch-4}" rx="7" fill="${v?`rgba(242,182,50,${f1(.12+t*.83)})`:'rgba(255,255,255,.035)'}"/>${v?T(x+cw/2,y+22,n(v),{a:'m',size:12.5,w:700,fill:t>.55?'#1a120b':INK}):''}`})});
+        g+=`<rect class="cg-pop" style="--i:${i*cols.length+j}" x="${f1(x+2)}" y="${y+2}" width="${f1(Math.max(1,cw-4))}" height="${ch-4}" rx="7" fill="${v?`rgba(242,182,50,${f1(.12+t*.83)})`:'rgba(255,255,255,.035)'}"/>${v?T(x+cw/2,y+22,n(v),{a:'m',size:12.5,w:700,fill:t>.55?'#1a120b':INK}):''}`})});
     return frame(W,H,g,o)}
 
   /* مربعات متداخلة (treemap) */
@@ -173,6 +173,6 @@ ${body}</svg>`}
       g+=`<path class="cg-grow" style="--i:${i}" d="M${cx} ${cy}L${f1(x0)} ${f1(y0)}A${f1(r)} ${f1(r)} 0 0 1 ${f1(x1)} ${f1(y1)}Z" fill="${c}" fill-opacity=".82"/>`+T(lx,ly+4,`${cut(d.label,10)} ${n(d.value)}`,{a:'m',size:11.5,fill:c})});
     return frame(W,H,g,o)}
 
-  return{setW:w=>{CW=w},hbar,donut,area,grouped,radar,heat,treemap,cloud,mind,sankey,stack,sunburst,bubbles,rose,PAL}
+  return{setW:w=>{CW=w},w:()=>CW,hbar,donut,area,grouped,radar,heat,treemap,cloud,mind,sankey,stack,sunburst,bubbles,rose,PAL}
 })();
 if(typeof module!=='undefined')module.exports=Charts;

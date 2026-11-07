@@ -437,3 +437,7 @@ textarea{width:100%;font:400 16px/1.7 var(--body);color:inherit;background:rgba(
 .lab-load .rw{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 .tbl-more{display:grid;justify-items:center;gap:4px;margin-top:10px}
 @media(max-width:640px){.src-row{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;scrollbar-width:none}.src-row::-webkit-scrollbar{display:none}.src{flex:0 0 150px;scroll-snap-align:start}}
+.narr{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.nr{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:6px 8px 6px 6px;padding-inline-start:12px;border-radius:999px;border:1px solid var(--line2);background:rgba(30,20,12,.85);color:var(--ink);font-size:14.5px;animation:itIn .4s var(--spring) both;animation-delay:calc(var(--i)*30ms);transition:transform .15s var(--spring),border-color .2s}
+.nr span{min-width:30px;padding:2px 8px;border-radius:999px;background:var(--gold);color:var(--on);font-weight:700;font-variant-numeric:tabular-nums;text-align:center}
+.nr:active{transform:scale(.95)}@media(hover:hover) and (pointer:fine){.nr:hover{border-color:var(--gold)}}

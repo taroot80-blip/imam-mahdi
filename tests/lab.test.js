@@ -47,6 +47,16 @@ const fake=[{id:'c1',title:'ح١',raw:'عن ابي عبد الله قال الق
  {id:'c2',title:'ح٢',raw:'القائم القائم',body:L.N('القائم القائم'),book:'الكافي',bk:'kafi',death:329,era:'q',cent:4,grade:'Mdaif',beh:false,door:null,section:'ج٢',corpus:true}];
 const fa=L.analyze({terms:['القائم'],units:fake,withApp:false});assert.equal(fa.per[0].total,3);assert.equal(fa.pool,2);
 assert.deepEqual(fa.gs.keys,['Msahih','Mdaif']);assert.equal(fa.gs.short('Mdaif'),'ضعيف');assert.equal(fa.per[0].byBeh['الكافي›1'],1);
+// الأسانيد
+const ch=L.chainOf({stype:'hadith',body:L.N('محمد بن يحيى عن أحمد بن محمد عن الحسن بن محبوب عن العلاء بن رزين عن محمد بن مسلم عن أبي جعفر ع قال')});
+assert.deepEqual(ch.names,['محمد بن يحيي','احمد بن محمد','الحسن بن محبوب','العلاء بن رزين','محمد بن مسلم']);assert.equal(ch.imam,'أبو جعفر (الباقر غالبًا)');
+const ch2=L.chainOf({stype:'hadith',body:L.N('علي بن إبراهيم عن أبيه عن ابن أبي عمير عن هشام عن أبي عبد الله عليه السلام قال')});assert.equal(ch2.imam,'الإمام الصادق');
+const ch3=L.chainOf({stype:'hadith',body:L.N('أحمد بن علي عن علي بن الحسين عن رجل ذكره قال')});assert.equal(ch3.imam,null,'علي بن الحسين راوٍ هنا');
+assert.equal(L.chainOf({stype:'mahdawi',body:'عن فلان'}),null);
+assert.equal(ps('ذكر اليماني في مكتبة الإمام المهدي').src,'mahdawi');assert.deepEqual(ps('ذكر اليماني في مكتبة الإمام المهدي').terms,['اليماني']);
+assert.equal(ps('محمد بن مسلم في كتب الرجال').src,'rijal');assert.deepEqual(ps('محمد بن مسلم في كتب الرجال').terms,['محمد بن مسلم']);
+assert.equal(ps('رواة أحاديث السفياني في البحار').view,'rijal');assert.equal(ps('رواة أحاديث السفياني في البحار').src,'bihar');assert.deepEqual(ps('رواة أحاديث السفياني في البحار').terms,['السفياني']);
+const fp=L.analyze({terms:['القائم'],units:fake,withApp:false,poolN:500});assert.equal(fp.pool,500);
 const fb=L.analyze({terms:['القائم'],units:fake,withApp:true});assert.ok(fb.pool===2+ctx.CONTENT.length);
 // تصحيح المصطلح: «للغيبة» → «الغيبة» غير موجود حرفيًا؟ يُقبل كما هو أو مصححًا
 const r=L.refine(['للغيبه','كلمةغيرموجودةابدا']);assert.ok(r[0].ok);assert.equal(r[1].ok,false);

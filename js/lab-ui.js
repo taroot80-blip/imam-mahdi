@@ -6,7 +6,7 @@ const LabUI=(()=>{
   const doorT=id=>(DOORS.find(d=>d.id===id)||{}).t||id;
   const doorC=id=>(DOORS.find(d=>d.id===id)||{}).c;
   const gName=g=>window.gradeName?gradeName(g):g;
-  const VIEWS=[['auto','تلقائي'],['book','حسب الكتب'],['era','القديمة والمعاصرة'],['cent','عبر القرون'],['grade','الثبوت والاعتبار'],['door','حسب الأبواب'],['mind','خريطة ذهنية'],['cloud','الكلمات المصاحبة']];
+  const VIEWS=[['auto','تلقائي'],['book','حسب الكتب'],['era','القديمة والمعاصرة'],['cent','عبر القرون'],['grade','الثبوت والاعتبار'],['door','حسب الأبواب'],['rijal','الرواة والأسانيد'],['mind','خريطة ذهنية'],['cloud','الكلمات المصاحبة']];
   const SCOPES=[['all','كل العصور'],['q','القديمة'],['m','المتأخرة'],['h','المعاصرة']];
   const EX=['قارن ذكر الغيبة بين الكتب القديمة والمعاصرة','ما مدى ثبوت روايات اللقاء؟','خريطة ذهنية للانتظار','قارن: السفياني، الصيحة، اليماني','تطور ذكر الفرج عبر القرون','كم ذُكر «طول العمر» في كل كتاب','الكلمات المصاحبة للظهور'];
   let st={q:'',terms:[],view:'auto',scope:'all',src:'four'},last=null,runId=0;
@@ -53,44 +53,36 @@ const LabUI=(()=>{
     const out=document.getElementById('labOut');const show=h=>{out.classList.remove('flash');void out.offsetWidth;out.innerHTML=h;wire(out);out.classList.add('flash')};
     if(!st.terms.length){last={overview:true};show(overviewHTML());return}
     const S=Corpus.source(st.src)||Corpus.source('app');
-    if(S.ext){const a=L.analyze({terms:st.terms,scope:st.scope});a.per.forEach(p=>{p.hits=p.hits.filter(h=>/بحار/.test(h.u.book))});last=null;show(biharHTML(a));return}
-    let units=null;
-    if(S.net){const keys=S.books();if(keys.some(k=>!Corpus.loaded(k))){show(loadingHTML(S,keys));
-        try{await Corpus.ensure(keys,(d,n,k)=>{const bar=document.getElementById('ldBar'),t=document.getElementById('ldT');if(bar)bar.style.transform=`scaleX(${n?d/n:0})`;if(t&&k)t.textContent=`حُمِّل ${(Corpus.meta(k)||{}).t||''} (${ar(d)} من ${ar(n)})`})}
-        catch(e){if(id!==runId)return;show(offlineHTML(S,e));return}
-        if(id!==runId)return}
-      units=keys.flatMap(k=>Corpus.units(k))}
+    let units=null,poolN=null;
+    if(S.net){const keys=S.books();await Corpus.warm();if(id!==runId)return;const fresh=keys.some(k=>!Corpus.loaded(k));show(loadingHTML(S,keys,fresh));
+      try{const r=await Corpus.scan(keys,st.terms,(d,n,k)=>{if(id!==runId)return;const bar=document.getElementById('ldBar'),t=document.getElementById('ldT');if(bar)bar.style.transform=`scaleX(${n?d/n:0})`;if(t&&k)t.textContent=`${fresh?'يُحمَّل ويُحلَّل':'يُحلَّل'}: ${(Corpus.meta(k)||{}).t||''} (${ar(d)} من ${ar(n)} ملفًا)`});units=r.units;poolN=r.pool}
+      catch(e){if(id!==runId)return;show(offlineHTML(S,e));return}
+      if(id!==runId)return}
     await new Promise(r=>setTimeout(r,20));if(id!==runId)return;
-    const a=L.analyze({terms:st.terms,scope:st.scope,units,withApp:!units||!!S.withApp});a.src=S;last=a;
-    show(understood(a)+kpis(a)+insights(a)+`<section class="lab-grid">${charts(a).map(card).join('')}</section>`+table(a)+titles(a)+note(a)+actions());
+    const a=L.analyze({terms:st.terms,scope:st.scope,units,withApp:!units||!!S.withApp,poolN});a.src=S;last=a;
+    show(understood(a)+kpis(a)+insights(a)+`<section class="lab-grid">${charts(a).map(card).join('')}</section>`+narrTable(a)+table(a)+titles(a)+note(a)+actions());
     try{SFX.play('sand')}catch(e){}}
-  function loadingHTML(S,keys){return `<section class="lab-load"><span class="ld-orb">${ic('globe')}</span><h2>يُحمَّل «${esc(S.t)}» من الشبكة</h2>
-    <p class="muted">نحو ${ar(Math.max(1,Math.round(Corpus.sizeMB(keys))))} م.ب تُحمَّل مرة واحدة، ثم تُحفظ في جهازك وتعمل بعدها دون إنترنت.</p><div class="ld-track"><i id="ldBar"></i></div><p class="muted" id="ldT">يبدأ التحميل…</p></section>`}
+  function loadingHTML(S,keys,fresh){const mb=Corpus.sizeMB(keys)*.3;return `<section class="lab-load"><span class="ld-orb">${ic(fresh?'globe':'spark')}</span><h2>${fresh?`يُحمَّل «${esc(S.t)}» من الشبكة`:`يُحلَّل «${esc(S.t)}»`}</h2>
+    ${fresh?`<p class="muted">نحو ${ar(Math.max(1,Math.round(mb)))} م.ب تقريبًا، تُحمَّل مرة واحدة ثم تُحفظ في جهازك وتعمل بعدها دون إنترنت.</p>`:`<p class="muted">المتون محفوظة في جهازك، ويجري البحث فيها الآن.</p>`}<div class="ld-track"><i id="ldBar"></i></div><p class="muted" id="ldT">يبدأ…</p></section>`}
   function offlineHTML(S,e){return `<section class="lab-load off"><span class="ld-orb">${ic('globe')}</span><h2>${e&&e.offline?'هذا الخيار يحتاج اتصالًا بالإنترنت':'تعذّر الوصول إلى المتون الآن'}</h2>
     <p class="muted">«${esc(S.t)}» متون كاملة تُحمَّل من الشبكة أول مرة. ${e&&e.offline?'اتصل بالإنترنت ثم أعد المحاولة':'تحقق من الاتصال ثم أعد المحاولة'}، أو اختر «نصوص التطبيق» لتعمل دون إنترنت.</p>
     <div class="rw"><button class="btn" id="ldRetry" data-sfx="key">أعد المحاولة</button><button class="btn2" id="ldApp" data-sfx="wood">قارن في نصوص التطبيق</button></div></section>`}
-  function biharHTML(a){const q=st.terms;const L2=a.per.filter(p=>p.items);
-    const ext=t=>[['مكتبة أهل البيت','ablibrary.net'],['مكتبة مدرسة الفقاهة','lib.eshia.ir'],['شبكة رافد','rafed.net']].map(([n,d])=>`<a class="wl" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(`"${t}" "بحار الأنوار" site:${d}`)}" data-sfx="key">${ic('link')} ${n}</a>`).join('');
-    return `<section class="lab-load"><span class="ld-orb">${ic('shelf')}</span><h2>بحار الأنوار قيد الفهرسة</h2>
-      <p class="muted">لا تتوفر متونه الكاملة مفهرسة في التطبيق بعد، فلا تُعرض له أعداد ولا رسوم حتى لا تكون أرقامًا ناقصة. ابحث فيه الآن على المكتبات المتخصصة، وستُضاف متونه على دفعات.</p></section>
-      ${q.map((t,i)=>`<section class="lab-und"><h2><span class="dot" style="--c:${C.PAL[i%C.PAL.length]}"></span>«${esc(t)}» في بحار الأنوار</h2><div class="wls">${ext(t)}</div>
-        ${(L2.find(p=>p.term===t)||{items:0}).items?`<p class="muted">وفي نصوص التطبيق ${ar(L2.find(p=>p.term===t).items)} نصًا منقولًا من البحار يرد فيه:</p><div class="its">${L2.find(p=>p.term===t).hits.map((h,j)=>`<a class="it" style="--i:${j}" href="#/item/${esc(h.u.id)}"><b>${esc(h.u.title)}</b><small>${esc(h.u.section||'')}</small></a>`).join('')}</div>`:''}</section>`).join('')}`}
-
   function understood(a){const p=st.parsed||{},bad=a.per.filter(x=>!x.total).map(x=>x.term);
     const vt=(VIEWS.find(v=>v[0]===st.view)||[])[1],sc=(SCOPES.find(s=>s[0]===st.scope)||[])[1];
     return `<section class="lab-und"><h2>${ic('spark')} فهمتُ سؤالك هكذا</h2>
       <div class="lab-terms">${a.terms.map((t,i)=>`<span class="term" style="--c:${C.PAL[i%C.PAL.length]}">${esc(t)}<button type="button" data-rm="${i}" aria-label="احذف ${esc(t)}" data-sfx="tap">${ic('x')}</button></span>`).join('')}
         <form class="term-add" id="termAdd"><input id="termIn" placeholder="أضف مصطلحًا للمقارنة" aria-label="أضف مصطلحًا"><button class="ic" aria-label="أضف" data-sfx="pen">${ic('plus')}</button></form></div>
-      <p class="muted">المصادر: <b>${esc(a.src?a.src.t:'نصوص التطبيق')}</b> · المقارنة: <b>${vt}</b> · العصر: <b>${sc}</b> · بحثتُ في ${ar(a.pool)} ${a.corpus?(a.withApp?'حديثًا ونصًا':'حديثًا'):'نصًا'}</p>${a.src&&a.src.missing?`<p class="muted lab-miss">قيد الفهرسة في هذا النطاق: ${esc(a.src.missing.join('، '))}</p>`:''}
+      <p class="muted">المصادر: <b>${esc(a.src?a.src.t:'نصوص التطبيق')}</b> · المقارنة: <b>${vt}</b> · العصر: <b>${sc}</b> · بحثتُ في ${ar(a.pool)} ${unitWord(a)}</p>${a.src&&a.src.missing?`<p class="muted lab-miss">قيد الفهرسة في هذا النطاق: ${esc(a.src.missing.join('، '))}</p>`:''}
       ${bad.length?`<p class="lab-warn">لم يرد «${esc(bad.join('»، «'))}» في هذه المصادر. جرّب صيغة أخرى للكلمة، أو ابحث عنه على الشبكة من صفحة البحث.</p>`:''}</section>`}
+  const unitWord=a=>!a.corpus?'نصًا':a.src&&['four','kafi','bihar','ghayba','hadith'].includes(a.src.k)?'حديثًا':'موضعًا';
   function kpis(a){const P=a.per,tot=P.reduce((s,p)=>s+p.total,0),books=new Set(P.flatMap(p=>p.hits.map(h=>h.u.book))).size;
     const old=Math.min(...P.flatMap(p=>p.hits.map(h=>h.u.death)).filter(Boolean));
-    const k=[[tot,'مرة ذُكر'],[a.matched,a.corpus?(a.withApp?'حديثًا ونصًا ورد فيه':'حديثًا ورد فيه'):'نصًا ورد فيه'],[books,'مصدرًا'],[a.pool?Math.round(a.matched/a.pool*1000)/10:0,'٪ من النصوص'],[isFinite(old)?Math.ceil(old/100):0,'أقدم قرن']];
+    const k=[[tot,'مرة ذُكر'],[a.matched,unitWord(a)+' ورد فيه'],[books,'مصدرًا'],[a.pool?Math.round(a.matched/a.pool*1000)/10:0,'٪ من النصوص'],[isFinite(old)?Math.ceil(old/100):0,'أقدم قرن']];
     return `<section class="kpis">${k.map(([v,t],i)=>`<div class="kpi" style="--i:${i}"><b data-count="${v}">${ar(v)}</b><span>${t}</span></div>`).join('')}</section>`}
   function insights(a){const L2=[];a.per.forEach(p=>{if(!p.total)return;const tb=sorted(p.byBook,1)[0],e=p.byEra;
       L2.push(`«${esc(p.term)}»: أكثر وروده في <b>${esc(tb[0])}</b> (${ar(tb[1])}).`);
       const q=e.q||0,h=e.h||0,m=e.m||0;if(!a.corpus||a.withApp)L2.push(`في القديمة ${ar(q)}، وفي المتأخرة ${ar(m)}، وفي المعاصرة ${ar(h)}.`);
-      const gg=sorted(p.byGrade).filter(([k])=>k!=='Mnone'),g=gg[0];if(g)L2.push(`أكثر نصوصه درجةً: «${esc(a.gs.name(g[0]))}» (${ar(g[1])} من ${ar(p.items)}).`);
+      const gg=sorted(p.byGrade).filter(([k])=>k!=='Mnone'&&k!=='N'),g=gg[0];if(g)L2.push(`أكثر نصوصه درجةً: «${esc(a.gs.name(g[0]))}» (${ar(g[1])} من ${ar(p.items)}).`);
       if(a.corpus){const b=Object.entries(p.byBeh).reduce((o,[k,v])=>{o[k.endsWith('›1')?1:0]+=v;return o},[0,0]);if(b[0]+b[1])L2.push(`صحّح البهبودي ${ar(b[1])} من ${ar(b[0]+b[1])} حديثًا فيه (${ar(Math.round(b[1]/(b[0]+b[1])*100))}٪).`)}});
     if(a.per.length>1){const w=[...a.per].sort((x,y)=>y.total-x.total);L2.push(`الأكثر حضورًا بين المصطلحات: «${esc(w[0].term)}» (${ar(w[0].total)})، والأقل: «${esc(w[w.length-1].term)}» (${ar(w[w.length-1].total)}).`)}
     return L2.length?`<section class="lab-ins"><h2>${ic('note')} قراءة سريعة</h2><ul>${L2.map((s,i)=>`<li style="--i:${i}">${s}</li>`).join('')}</ul></section>`:''}
@@ -136,20 +128,31 @@ const LabUI=(()=>{
     const beh=()=>{const o=sumObj(P.map(x=>x.byBeh)),bk=[...new Set(Object.keys(o).map(k=>k.split('›')[0]))];
       return{k:'grade',svg:C.stack(bk,[{t:'صحيح عند البهبودي',c:'#22C55E'},{t:'لم يُخرجه',c:'#6b5d4a'}],bk.map(b=>[o[b+'›1']||0,o[b+'›0']||0]),{title:T(': ما صحّحه البهبودي'),sub:'نسبة الأحاديث المختارة في الصحيح من كل كتاب'})}};
     const vols=()=>{const sec=sumObj(P.map(x=>x.bySection)),bk=BK().filter(b=>Object.keys(sec).some(k=>k.startsWith(b+'›')&&k!==b+'›ج١')).slice(0,6);if(!bk.length)return share();
-      const vs=[...new Set(Object.keys(sec).filter(k=>bk.some(b=>k.startsWith(b+'›'))).map(k=>k.split('›')[1]))].sort((x,y)=>x.localeCompare(y,'ar',{numeric:true}));
-      return{k:'book',svg:C.heat(bk,vs,bk.map(b=>vs.map(v=>sec[b+'›'+v]||0)),{title:T(': في أجزاء كل كتاب'),sub:'أين يتركز الذكر داخل الكتاب'})}};
+      const vt={};Object.entries(sec).filter(([k])=>bk.some(b=>k.startsWith(b+'›'))).forEach(([k,v])=>{const c=k.split('›')[1];vt[c]=(vt[c]||0)+v});
+      const vs=sorted(vt,Charts.w()<500?8:12).map(x=>x[0]).sort((x,y)=>x.localeCompare(y,'ar',{numeric:true}));
+      return{k:'book',svg:C.heat(bk,vs,bk.map(b=>vs.map(v=>sec[b+'›'+v]||0)),{title:T(': في أجزاء كل كتاب'),sub:Object.keys(vt).length>vs.length?`أكثر ${ar(vs.length)} أجزاء ذكرًا من ${ar(Object.keys(vt).length)}`:'أين يتركز الذكر داخل الكتاب'})}};
     const heatBook=()=>{const bk=BK().slice(0,8);return{k:'book',svg:C.heat(P.map(x=>x.term),bk,P.map(x=>bk.map(b=>x.byBook[b]||0)),{title:'خريطة حرارية: المصطلحات × الكتب',sub:'كلما اشتد اللون كثر الذكر'})}};
     const sunC=()=>{const s=sumObj(P.map(x=>x.bySection)),by={};Object.entries(s).forEach(([k,v])=>{const [b,sec]=k.split('›');(by[b]=by[b]||{label:b,value:0,children:[]}).value+=v;by[b].children.push({label:sec,value:v})});
       return{k:'book',svg:C.sunburst(Object.values(by).sort((x,y)=>y.value-x.value).slice(0,10),{title:T(': الكتب وأجزاؤها'),sub:'الحلقة الداخلية الكتب، والخارجية أجزاؤها',center:one?p.term:''})}};
     const mindB=()=>{const tree=P.length>1?{label:'المقارنة',children:P.map((x,i)=>({label:x.term,value:x.total,color:C.PAL[i%C.PAL.length],children:sorted(x.byBook,4).map(([l,v])=>({label:l,value:v}))}))}
         :{label:p.term,children:sorted(p.byBook,7).map(([b,v],i)=>({label:b,value:v,color:C.PAL[i%C.PAL.length],children:sorted(Object.fromEntries(Object.entries(p.bySection).filter(([k])=>k.startsWith(b+'›')).map(([k,v2])=>[k.split('›')[1],v2])),3).map(([l,v2])=>({label:l,value:v2}))}))};
       return{k:'mind',svg:C.mind(tree,{title:T(': خريطة ذهنية'),sub:'الفروع كتب، والأوراق أجزاؤها'})}};
+    // الأسانيد والأبواب ومصادر البحار
+    const imams=()=>{const o=sumObj(P.map(x=>x.byImam));return{k:'rijal',svg:C.donut(sorted(o,9).map(([l,v],i)=>({label:l,value:v,color:l.startsWith('غير')?'#6b5d4a':C.PAL[i%C.PAL.length]})),{title:T(': المعصوم المروي عنه'),sub:'بحسب آخر السند، استخراج تقريبي',center:'حديثًا'})}};
+    const narr=()=>({k:'rijal',svg:C.hbar(sorted(sumObj(P.map(x=>x.byNarr)),14).map(([l,v])=>({label:l,value:v})),{title:T(': أكثر الرواة في الأسانيد'),sub:'عدد الأحاديث التي ورد الراوي في سندها، استخراج تقريبي',cut:24})});
+    const babs=()=>({k:'book',svg:C.hbar(sorted(sumObj(P.map(x=>x.byBab)),12).map(([l,v])=>({label:BK().length<2?l.replace(/^[^·]+· /,''):l,value:v})),{title:T(': أكثر الأبواب ذكرًا'),sub:'الكتاب والباب',cut:30,lw:Math.round(Charts.w()*.5)})});
+    const via=()=>({k:'book',svg:C.hbar(sorted(sumObj(P.map(x=>x.byVia)),12).map(([l,v])=>({label:l,value:v})),{title:T(': مصادر البحار'),sub:'الكتب التي نقل منها المجلسي ما ورد فيه المصطلح'})});
+    const GRP={four:'الكتب الأربعة',ghayba:'كتب الغيبة',other:'كتب حديثية أخرى',bihar:'بحار الأنوار',mahdawi:'مكتبة الإمام المهدي',rijal:'كتب الرجال',app:'نصوص التطبيق'};
+    const groups=()=>({k:'book',svg:C.donut(sorted(sumObj(P.map(x=>x.byGroup))).map(([g,v],i)=>({label:GRP[g]||g,value:v,color:C.PAL[i%C.PAL.length]})),{title:T(': بين أصناف المكتبة'),sub:'الحديث والمهدوية والرجال',center:'ذكرًا'})});
+    const hasNarr=P.some(x=>x.withChain),hasVia=P.some(x=>Object.keys(x.byVia).length),hasBab=P.some(x=>Object.keys(x.byBab).length),multiEra=Object.keys(sumObj(P.map(x=>x.byEra))).length>1,multiGrp=Object.keys(sumObj(P.map(x=>x.byGroup))).length>1;
+    const R_=[...(hasNarr?[imams,narr]:[]),...(hasVia?[via]:[]),...(hasBab?[babs]:[])],E_=multiEra?[eraDonut,cent,bub]:[],G_=multiGrp?[groups]:[];
     const hasMaj=GK.some(g=>g[0]==='M'&&g!=='Mnone'),hasBeh=P.some(x=>Object.keys(x.byBeh).length);
-    if(a.corpus&&!a.withApp){const planC=one?{auto:[byBook,share,vols,...(hasMaj?[maj]:[]),...(hasBeh?[beh]:[]),mindB,cloudC,tree,sunC],book:[byBook,share,tree,vols,sunC],era:[byBook,share,cent],cent:[byBook,vols,cent],grade:[...(hasMaj?[maj,bookGrade]:[]),...(hasBeh?[beh]:[]),byBook,share],door:[sunC,vols,mindB],mind:[mindB,sunC,cloudC],cloud:[cloudC,mindB,byBook]}
-        :{auto:[multiBook,heatBook,...(hasMaj?[gradeMulti]:[]),...(hasBeh?[beh]:[]),mindB,vols,cloudC],book:[multiBook,heatBook,tree,vols],era:[multiBook,heatBook],cent:[multiBook,vols],grade:[...(hasMaj?[gradeMulti,bookGrade]:[]),...(hasBeh?[beh]:[]),multiBook],door:[heatBook,sunC,mindB],mind:[mindB,sunC,cloudC],cloud:[cloudC,mindB,multiBook]};
-      (planC[V]||planC.auto).filter((f,i,arr)=>arr.indexOf(f)===i).forEach((fn,i)=>list.push({...fn(),big:i===0}));return list}
-    const plan=one?{auto:[byBook,eraDonut,cent,gradeStack,mindC,sank,doors,cloudC,bub,tree,gradeDonut,sun],book:[byBook,tree,bub,eraDonut,gradeStack,cent],era:[eraDonut,gradeStack,cent,bub,byBook,sank],cent:[cent,bub,eraDonut,byBook],grade:[gradeStack,sank,gradeDonut,type,eraDonut,byBook],door:[doors,sun,mindC,byBook],mind:[mindC,sun,cloudC,doors],cloud:[cloudC,mindC,byBook]}
-      :{auto:[eraGroup,multiBook,cent,heatDoor,gradeMulti,mindC,doors,sank,cloudC,bub],book:[multiBook,byBook,tree,bub],era:[eraGroup,cent,gradeStack,bub],cent:[cent,bub,eraGroup],grade:[gradeMulti,gradeStack,sank,gradeDonut],door:[heatDoor,doors,sun,mindC],mind:[mindC,sun,cloudC],cloud:[cloudC,mindC,multiBook]};
+    if(a.corpus&&!a.withApp){const planC=one?{auto:[byBook,...E_,...G_,share,...(hasMaj?[maj]:[]),...(hasBeh?[beh]:[]),...R_,vols,mindB,cloudC,tree],book:[byBook,share,tree,vols,...(hasBab?[babs]:[]),sunC],era:[...E_,byBook,share,...G_],cent:[cent,bub,byBook,vols],rijal:[...R_,byBook],grade:[...(hasMaj?[maj,bookGrade]:[]),...(hasBeh?[beh]:[]),byBook,share],door:[sunC,vols,mindB],mind:[mindB,sunC,cloudC],cloud:[cloudC,mindB,byBook]}
+        :{auto:[multiBook,heatBook,...(multiEra?[eraGroup,cent]:[]),...(hasMaj?[gradeMulti]:[]),...(hasBeh?[beh]:[]),...R_,mindB,vols,cloudC],book:[multiBook,heatBook,tree,vols],era:[...(multiEra?[eraGroup,cent,bub]:[]),multiBook,heatBook],cent:[cent,multiBook,vols],rijal:[...R_,multiBook],grade:[...(hasMaj?[gradeMulti,bookGrade]:[]),...(hasBeh?[beh]:[]),multiBook],door:[heatBook,sunC,mindB],mind:[mindB,sunC,cloudC],cloud:[cloudC,mindB,multiBook]};
+      const oneBook=BK().length<2,skip=oneBook?[byBook,share,tree,sunC]:[];let L3=(planC[V]||planC.auto).filter((f,i,arr)=>arr.indexOf(f)===i&&!skip.includes(f));if(oneBook&&!L3.length)L3=[vols,babs,mindB,cloudC];
+      L3.forEach((fn,i)=>list.push({...fn(),big:i===0}));return list}
+    const plan=one?{rijal:[byBook,eraDonut],auto:[byBook,eraDonut,cent,gradeStack,mindC,sank,doors,cloudC,bub,tree,gradeDonut,sun],book:[byBook,tree,bub,eraDonut,gradeStack,cent],era:[eraDonut,gradeStack,cent,bub,byBook,sank],cent:[cent,bub,eraDonut,byBook],grade:[gradeStack,sank,gradeDonut,type,eraDonut,byBook],door:[doors,sun,mindC,byBook],mind:[mindC,sun,cloudC,doors],cloud:[cloudC,mindC,byBook]}
+      :{rijal:[multiBook,eraGroup],auto:[eraGroup,multiBook,cent,heatDoor,gradeMulti,mindC,doors,sank,cloudC,bub],book:[multiBook,byBook,tree,bub],era:[eraGroup,cent,gradeStack,bub],cent:[cent,bub,eraGroup],grade:[gradeMulti,gradeStack,sank,gradeDonut],door:[heatDoor,doors,sun,mindC],mind:[mindC,sun,cloudC],cloud:[cloudC,mindC,multiBook]};
     (plan[V]||plan.auto).forEach((fn,i)=>list.push({...fn(),big:i===0}));return list}
   const sumObj=arr=>arr.reduce((o,x)=>{Object.entries(x).forEach(([k,v])=>o[k]=(o[k]||0)+v);return o},{});
   let cid=0;const BANK={};
@@ -165,13 +168,17 @@ const LabUI=(()=>{
   const moreHTML=()=>rows.length>shown?`<button class="btn2" id="tMoreB" data-sfx="paper">اعرض المزيد (${ar(Math.min(rows.length,shown+30))} من ${ar(rows.length)})</button><small class="muted">والجدول المصدَّر يحمل المواضع كلها</small>`:'';
   function rowsHTML(){const G=(last&&last.gs)||L.scheme(),g=G.keys;const r=[...rows].sort((x,y)=>sortK==='c'?y.c-x.c:sortK==='d'?(x.u.death||9999)-(y.u.death||9999):sortK==='g'?g.indexOf(x.u.grade)-g.indexOf(y.u.grade):x.u.book.localeCompare(y.u.book,'ar'));
     return r.slice(0,shown).map((x,i)=>{const s=L.snippet(x.u.raw,x.n);return `<tr style="--i:${Math.min(i,20)}"><td data-l="م">${ar(i+1)}</td><td data-l="المصطلح"><span class="dot" style="--c:${C.PAL[x.p%C.PAL.length]}"></span>${esc(x.term)}</td>
-      <td data-l="النص" class="tx">${x.u.corpus?`<a href="${esc(x.u.url)}" target="_blank" rel="noopener" data-sfx="key"><b>${esc(x.u.title)}</b> ${ic('link')}</a>`:`<a href="#/item/${esc(x.u.id)}" data-sfx="paper"><b>${esc(x.u.title)}</b></a>`}${s?`<q>${esc(s.pre)}<mark>${esc(s.hit)}</mark>${esc(s.post)}</q>`:''}</td>
+      <td data-l="النص" class="tx">${x.u.corpus?(x.u.url?`<a href="${esc(x.u.url)}" target="_blank" rel="noopener" data-sfx="key"><b>${esc(x.u.title)}</b> ${ic('link')}</a>`:`<b>${esc(x.u.title)}</b>`)+(x.u.bab?`<small>${esc(x.u.bab)}</small>`:'')+(x.u.via?`<small>نقلًا عن: ${esc(x.u.via)}</small>`:''):`<a href="#/item/${esc(x.u.id)}" data-sfx="paper"><b>${esc(x.u.title)}</b></a>`}${s?`<q>${esc(s.pre)}<mark>${esc(s.hit)}</mark>${esc(s.post)}</q>`:''}</td>
       <td data-l="المصدر">${esc(x.u.book)}${x.u.author?`<small>${esc(x.u.author)}</small>`:''}</td><td data-l="العصر"><span class="era" style="--c:${ERA[x.u.era].c}">${ERA[x.u.era].t}</span>${x.u.cent?`<small>ق${ar(x.u.cent)}</small>`:''}</td>
       <td data-l="الدرجة">${x.u.grade==='Mnone'&&!x.u.beh?'<small>—</small>':`<span class="grade" style="color:${G.color(x.u.grade)}">${esc(x.u.grade==='Mnone'?'':G.name(x.u.grade))}</span>`}${x.u.beh?'<small class="beh">صحيح عند البهبودي</small>':''}</td><td data-l="مرات" class="num">${ar(x.c)}</td></tr>`}).join('')}
+  function narrTable(a){const o=sumObj(a.per.map(p=>p.byNarr||{})),top=sorted(o,15);if(!top.length)return '';const im=sorted(sumObj(a.per.map(p=>p.byImam||{})),6);
+    return `<section class="lab-tbl"><h2>${ic('book')} رجال الأسانيد</h2><p class="muted">أكثر الرواة ورودًا في أسانيد ما ورد فيه المصطلح، مستخرجة آليًا على وجه التقريب. اضغط على راوٍ لتبحث عن ترجمته وحاله وطبقته في كتب الرجال.</p>
+      <div class="narr">${top.map(([n,v],i)=>`<button type="button" class="nr" style="--i:${i}" data-narr="${esc(n)}" data-sfx="paper"><b>${esc(n)}</b><span>${ar(v)}</span></button>`).join('')}</div>
+      ${im.length?`<p class="muted">المروي عنه: ${im.map(([n,v])=>`${esc(n)} (${ar(v)})`).join('، ')}.</p>`:''}</section>`}
   function titles(a){const b=a.per.flatMap(p=>p.titleBooks.map(x=>({...x,term:p.term})));if(!b.length)return '';
     return `<section class="lab-tbl"><h2>${ic('shelf')} كتب يحمل عنوانها المصطلح</h2><p class="muted">من فهرس الـ${ar(Lab.build().books.length)} عنوانًا؛ يُعرف منها اتجاه التأليف في القضية عبر العصور.</p>
       <div class="tbl-w"><table><thead><tr><th>العنوان</th><th>المؤلف</th><th>الوفاة</th><th>العصر</th><th>النوع</th></tr></thead><tbody>${b.map(x=>`<tr><td><b>${esc(x.t)}</b></td><td>${esc(x.a)}</td><td>${esc(x.d)}</td><td><span class="era" style="--c:${ERA[x.era].c}">${ERA[x.era].t}</span></td><td>${L.KIND[x.kind]||''}</td></tr>`).join('')}</tbody></table></div></section>`}
-  const note=a=>a&&a.corpus?`<p class="lab-note">المتون الكاملة من موقع «ثقلين» (thaqalayn.net) بنسخها العربية، والعدّ على النص بلا تشكيل فيشمل السند والمتن. تقييم المجلسي من مرآة العقول ويخص الكافي، وتقييم البهبودي كما نقله الموقع. والتقييم بيان لحال السند عند صاحبه لا حكم من التطبيق. ${a.withApp?`وأُضيفت نصوص التطبيق الموثقة (${ar(Lab.build().units.length)} نصًا) لتشمل المقارنة الكتب المعاصرة.`:''}</p>`
+  const note=a=>a&&a.corpus?`<p class="lab-note">مصادر المتون: «ثقلين» (thaqalayn.net) للكافي والفقيه وكتب الغيبة، وبحار الأنوار بطبعة دار إحياء التراث، ومكتبة القائمية (ghbook.ir) للاستبصار والتهذيب ومكتبة الإمام المهدي وكتب الرجال. والعدّ على النص بلا تشكيل فيشمل السند والمتن. تقييم المجلسي من مرآة العقول ويخص الكافي، وتقييم البهبودي كما نقله «ثقلين». والرواة والمروي عنه مستخرجة آليًا على وجه التقريب، فراجع السند في مصدره. ${a.withApp?`وأُضيفت نصوص التطبيق الموثقة (${ar(Lab.build().units.length)} نصًا).`:''}</p>`
     :`<p class="lab-note">الأرقام محسوبة من نصوص التطبيق الموثقة (${ar(Lab.build().units.length)} نصًا) لا من متون الكتب كاملة. ولمقارنة المتون الكاملة اختر «الكتب الأربعة» أو «كتب الغيبة» أو «كل الكتب المفهرسة». والدرجة تبيّن طريق النقل ولا تعني الحكم بصحته. والعصر بحسب وفاة المؤلف.</p>`;
   const actions=()=>`<section class="lab-acts"><button class="btn" id="aAI" data-sfx="ember">${ic('spark')} حلّل بعمق مع Claude</button><button class="btn2" id="aPrint" data-sfx="paper">${ic('print')} اطبع أو احفظ PDF</button><button class="btn2" id="aHtml" data-sfx="key">${ic('download')} صدّر التقرير</button><button class="btn2" id="aCsv" data-sfx="key">${ic('table')} صدّر الجدول CSV</button></section>`;
 
@@ -203,7 +210,7 @@ const LabUI=(()=>{
     const s=out.querySelector('#tSort');if(s)s.onchange=()=>{sortK=s.value;document.getElementById('tBody').innerHTML=rowsHTML()};
     const more=()=>{const b=document.getElementById('tMoreB');if(b)b.onclick=()=>{shown+=30;document.getElementById('tBody').innerHTML=rowsHTML();document.getElementById('tMore').innerHTML=moreHTML();more()}};more();
     const on=(id,f)=>{const e=out.querySelector('#'+id);if(e)e.onclick=f};
-    on('ldRetry',()=>run());on('ldApp',()=>{st.src='app';run()});on('aPrint',printReport);on('aHtml',()=>save(fileBase()+'.html','text/html',reportHTML()));on('aCsv',csv);on('aAI',claude);
+    on('ldRetry',()=>run());out.querySelectorAll('[data-narr]').forEach(b=>b.onclick=()=>{st.src='rijal';st.terms=[b.dataset.narr];st.view='auto';st.q='ترجمة '+b.dataset.narr+' في كتب الرجال';const ta=document.getElementById('labQ');if(ta)ta.value=st.q;run();scrollTo({top:document.getElementById('labOut').offsetTop-90,behavior:'smooth'})});on('ldApp',()=>{st.src='app';run()});on('aPrint',printReport);on('aHtml',()=>save(fileBase()+'.html','text/html',reportHTML()));on('aCsv',csv);on('aAI',claude);
     countUp(out)}
   function countUp(out){if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;out.querySelectorAll('[data-count]').forEach(el=>{const v=+el.dataset.count,t0=performance.now();
     const dec=v%1?10:1;const step=t=>{const k=Math.min(1,(t-t0)/900),e=1-Math.pow(1-k,3);el.textContent=ar(Math.round(v*e*dec)/dec);if(k<1)requestAnimationFrame(step)};requestAnimationFrame(step)})}
