@@ -11,6 +11,7 @@ T=pathlib.Path(os.environ['TOOLS']); KEYS=pathlib.Path(os.environ['KEYS']); KEYS
 OUT=pathlib.Path(os.environ['OUT']); OUT.mkdir(parents=True,exist_ok=True); B=OUT/'build'
 AAPT2=str(T/'aapt/package/bin/x64/linux/aapt2'); JAR=str(T/'android.jar'); BT=['java','-jar',str(T/'bundletool.jar')]
 J2D=str(next((T/'dex2jar').glob('*/d2j-jar2dex.sh')))
+TV=os.environ.get('TV')=='1'
 PKG='com.almaateeq.mastoor'; VC=int(os.environ.get('VERSION_CODE',1)); VN=os.environ.get('VERSION_NAME','1.0.0')
 MIN_SDK,TARGET_SDK=24,36; NAME='المستور'
 WEB=['index.html','privacy.html','manifest.webmanifest','icon-192.png','icon-512.png','js','data','assets','fonts','css']
@@ -21,6 +22,9 @@ def run(c,**k):
 if B.exists(): shutil.rmtree(B)
 for p in ['res/values','res/drawable-nodpi','res/mipmap-anydpi-v26','res/mipmap-xxxhdpi','classes','module/manifest','module/dex','module/assets/www']: (B/p).mkdir(parents=True)
 ic=Image.open(REPO/'icon-512.png').convert('RGBA')
+# شريط التلفاز 320×180dp بدقة xhdpi، ونسخة أوضح للشاشات الكبيرة
+for d,sz in [('drawable-xhdpi',(320,180)),('drawable-xxxhdpi',(640,360))]:
+    (B/'res'/d).mkdir(parents=True,exist_ok=True); Image.open(HERE/'tv_banner.png').convert('RGB').resize(sz,Image.LANCZOS).save(B/'res'/d/'tv_banner.png')
 ic.resize((192,192)).save(B/'res/mipmap-xxxhdpi/ic_launcher.png')
 fg=Image.new('RGBA',(432,432),(0,0,0,0)); sm=ic.resize((280,280)); fg.paste(sm,(76,76)); fg.save(B/'res/drawable-nodpi/ic_fg.png')
 (B/'res/mipmap-anydpi-v26/ic_launcher.xml').write_text('<?xml version="1.0" encoding="utf-8"?>\n<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android"><background android:drawable="@color/ic_bg"/><foreground android:drawable="@drawable/ic_fg"/></adaptive-icon>\n')
@@ -30,14 +34,17 @@ m=B/'AndroidManifest.xml'
 m.write_text(f'''<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="{PKG}">
   <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
+  <uses-feature android:name="android.software.leanback" android:required="false"/>
+  <uses-feature android:name="android.hardware.microphone" android:required="false"/>
   <queries><intent><action android:name="android.intent.action.VIEW"/><data android:scheme="https"/></intent>
     <intent><action android:name="android.speech.action.RECOGNIZE_SPEECH"/></intent>
     <intent><action android:name="android.intent.action.TTS_SERVICE"/></intent></queries>
-  <application android:enableOnBackInvokedCallback="true" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher"
+  <application android:enableOnBackInvokedCallback="true" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:banner="@drawable/tv_banner" android:roundIcon="@mipmap/ic_launcher"
       android:theme="@style/AppTheme" android:allowBackup="false" android:supportsRtl="true" android:hardwareAccelerated="true" android:usesCleartextTraffic="false">
     <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTask"
         android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize|uiMode|density">
-      <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
+      <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/><category android:name="android.intent.category.LEANBACK_LAUNCHER"/></intent-filter>
     </activity>
   </application>
 </manifest>
@@ -59,7 +66,7 @@ with zipfile.ZipFile(B/'linked.zip') as z:
 with zipfile.ZipFile(B/'base.zip','w',zipfile.ZIP_DEFLATED) as z:
     for f in sorted((B/'module').rglob('*')):
         if f.is_file(): z.write(f,f.relative_to(B/'module'))
-aab=OUT/f'المستور-{VN}.aab'
+aab=OUT/f'المستور-{VN}{"-tv" if TV else ""}.aab'
 if aab.exists(): aab.unlink()
 run(BT+['build-bundle',f'--modules={B/"base.zip"}',f'--output={aab}'])
 ks,pf=KEYS/'mastoor-upload.jks',KEYS/'mastoor-upload-password.txt'
@@ -72,5 +79,5 @@ run(['jarsigner','-keystore',ks,'-storepass',pw,'-keypass',pw,'-sigalg','SHA256w
 run(BT+['validate',f'--bundle={aab}'])
 apks=B/'app.apks'
 run(BT+['build-apks',f'--bundle={aab}',f'--output={apks}','--mode=universal',f'--ks={ks}','--ks-key-alias=upload',f'--ks-pass=pass:{pw}',f'--key-pass=pass:{pw}'])
-with zipfile.ZipFile(apks) as z: (OUT/f'المستور-{VN}-للتجربة.apk').write_bytes(z.read('universal.apk'))
+with zipfile.ZipFile(apks) as z: (OUT/(f'المستور-تلفاز-{VN}.apk' if TV else f'المستور-{VN}-للتجربة.apk')).write_bytes(z.read('universal.apk'))
 print('done',aab.stat().st_size)

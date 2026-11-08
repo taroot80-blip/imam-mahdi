@@ -80,6 +80,9 @@ public class MainActivity extends Activity {
         root.addView(web, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         setContentView(root);
+        web.setFocusable(true);
+        web.setFocusableInTouchMode(true);
+        web.requestFocus();
 
         if (Build.VERSION.SDK_INT >= 35) {
             root.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
@@ -212,6 +215,14 @@ public class MainActivity extends Activity {
 
     /** واجهة تستدعيها صفحة الويب. */
     private final class Bridge {
+        @JavascriptInterface
+        public String isTv() {
+            android.app.UiModeManager u = (android.app.UiModeManager) getSystemService(UI_MODE_SERVICE);
+            boolean tv = (u != null && u.getCurrentModeType() == android.content.res.Configuration.UI_MODE_TYPE_TELEVISION)
+                    || getPackageManager().hasSystemFeature("android.software.leanback");
+            return tv ? "1" : "0";
+        }
+
         @JavascriptInterface
         public String ttsInfo() { return ttsReady ? "1" : "0"; }
 
