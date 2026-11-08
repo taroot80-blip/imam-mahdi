@@ -1,6 +1,8 @@
 package com.almaateeq.mastoor;
 
 import android.app.Activity;
+import android.app.UiModeManager;
+import android.content.res.Configuration;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Insets;
@@ -212,6 +214,13 @@ public class MainActivity extends Activity {
 
     /** واجهة تستدعيها صفحة الويب. */
     private final class Bridge {
+        /** هل يعمل التطبيق على تلفاز (Android TV)؟ فتُفعَّل واجهة التلفاز والتنقّل بالريموت. */
+        @JavascriptInterface
+        public boolean isTV() {
+            UiModeManager m = (UiModeManager) getSystemService(UI_MODE_SERVICE);
+            return m != null && m.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION;
+        }
+
         @JavascriptInterface
         public String ttsInfo() { return ttsReady ? "1" : "0"; }
 

@@ -19,25 +19,31 @@ def run(c,**k):
     if r.returncode: print('FAILED',' '.join(map(str,c)),r.stdout[-3000:],r.stderr[-3000:]); sys.exit(1)
     return r.stdout
 if B.exists(): shutil.rmtree(B)
-for p in ['res/values','res/drawable-nodpi','res/mipmap-anydpi-v26','res/mipmap-xxxhdpi','classes','module/manifest','module/dex','module/assets/www']: (B/p).mkdir(parents=True)
+for p in ['res/values','res/drawable-nodpi','res/drawable-xhdpi','res/drawable-xxhdpi','res/drawable-xxxhdpi','res/mipmap-anydpi-v26','res/mipmap-xxxhdpi','classes','module/manifest','module/dex','module/assets/www']: (B/p).mkdir(parents=True)
 ic=Image.open(REPO/'icon-512.png').convert('RGBA')
 ic.resize((192,192)).save(B/'res/mipmap-xxxhdpi/ic_launcher.png')
 fg=Image.new('RGBA',(432,432),(0,0,0,0)); sm=ic.resize((280,280)); fg.paste(sm,(76,76)); fg.save(B/'res/drawable-nodpi/ic_fg.png')
 (B/'res/mipmap-anydpi-v26/ic_launcher.xml').write_text('<?xml version="1.0" encoding="utf-8"?>\n<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android"><background android:drawable="@color/ic_bg"/><foreground android:drawable="@drawable/ic_fg"/></adaptive-icon>\n')
 (B/'res/values/strings.xml').write_text(f'<?xml version="1.0" encoding="utf-8"?>\n<resources><string name="app_name">{NAME}</string><color name="ic_bg">#0B0805</color></resources>\n',encoding='utf-8')
 (B/'res/values/styles.xml').write_text('<?xml version="1.0" encoding="utf-8"?>\n<resources><style name="AppTheme" parent="android:Theme.Material.NoActionBar"><item name="android:windowBackground">#0B0805</item><item name="android:colorAccent">#F2B632</item><item name="android:statusBarColor">#0B0805</item><item name="android:navigationBarColor">#0B0805</item></style></resources>\n')
+# بانر التلفاز (Android TV) 320×180 بكثافة xhdpi وما يقابلها؛ مصدره store/tv/banner-source.html
+for dpi in ('xhdpi','xxhdpi','xxxhdpi'): shutil.copy(HERE/'tv'/f'banner-{dpi}.png',B/f'res/drawable-{dpi}/tv_banner.png')
 m=B/'AndroidManifest.xml'
 m.write_text(f'''<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="{PKG}">
   <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-feature android:name="android.software.leanback" android:required="false"/>
+  <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
+  <uses-feature android:name="android.hardware.microphone" android:required="false"/>
   <queries><intent><action android:name="android.intent.action.VIEW"/><data android:scheme="https"/></intent>
     <intent><action android:name="android.speech.action.RECOGNIZE_SPEECH"/></intent>
     <intent><action android:name="android.intent.action.TTS_SERVICE"/></intent></queries>
-  <application android:enableOnBackInvokedCallback="true" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher"
+  <application android:enableOnBackInvokedCallback="true" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:banner="@drawable/tv_banner" android:roundIcon="@mipmap/ic_launcher"
       android:theme="@style/AppTheme" android:allowBackup="false" android:supportsRtl="true" android:hardwareAccelerated="true" android:usesCleartextTraffic="false">
     <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTask"
         android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize|uiMode|density">
-      <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
+      <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/>
+        <category android:name="android.intent.category.LEANBACK_LAUNCHER"/></intent-filter>
     </activity>
   </application>
 </manifest>

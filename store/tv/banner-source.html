@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../fonts/fonts.css">
+<style>
+:root{--gold:#F2B632;--gold2:#ffd36e}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1280px;height:720px;overflow:hidden;background:#0b0805}
+.b{position:relative;width:1280px;height:720px;overflow:hidden;background:#0b0805}
+/* صورة الافتتاحية: المئذنة والقبة في الضباب */
+.photo{position:absolute;left:0;top:0;width:620px;height:720px;background:url(../../assets/splash.webp) 30% 46%/ 640px auto no-repeat;
+  filter:sepia(.55) saturate(1.15) brightness(.82) contrast(1.05);
+  -webkit-mask-image:linear-gradient(90deg,#000 0,#000 52%,transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 52%,transparent 100%)}
+.warm{position:absolute;inset:0;background:
+  radial-gradient(ellipse 45% 60% at 72% 46%,rgba(242,182,50,.20),transparent 70%),
+  linear-gradient(90deg,rgba(11,8,5,.15) 0,rgba(11,8,5,.35) 40%,rgba(11,8,5,.92) 62%,#0b0805 100%)}
+.fog{position:absolute;left:-80px;bottom:-60px;width:900px;height:300px;background:radial-gradient(ellipse at 50% 60%,rgba(246,231,200,.22),transparent 65%);filter:blur(10px)}
+/* المدار: مستوحى من أيقونة التطبيق */
+.orbit{position:absolute;right:120px;top:50%;width:560px;height:560px;transform:translateY(-50%)}
+.orbit .r1{position:absolute;inset:0;border-radius:50%;border:3px solid rgba(242,182,50,.55);box-shadow:0 0 30px rgba(242,182,50,.25),inset 0 0 30px rgba(242,182,50,.12)}
+.orbit .r2{position:absolute;inset:48px;border-radius:50%;border:2px dashed rgba(255,211,110,.35)}
+.orbit .orb{position:absolute;left:50%;top:50%;width:150px;height:150px;transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(circle at 60% 38%,rgba(255,240,190,.35),rgba(242,182,50,.12) 55%,transparent 72%);filter:blur(2px)}
+.dot{position:absolute;width:16px;height:16px;border-radius:50%;background:#ffe7a3;box-shadow:0 0 18px 6px rgba(242,182,50,.85)}
+/* ليزر */
+.laser{position:absolute;height:2px;width:1700px;left:-200px;background:linear-gradient(90deg,transparent,rgba(255,211,110,0) 25%,rgba(255,211,110,.9) 55%,rgba(255,211,110,0) 85%,transparent);filter:drop-shadow(0 0 6px #F2B632)}
+.l1{top:118px;transform:rotate(-7deg);opacity:.5}.l2{top:640px;transform:rotate(-7deg);opacity:.32}
+.spark{position:absolute;border-radius:50%;background:#ffe7a3;box-shadow:0 0 10px 3px rgba(242,182,50,.8)}
+/* النص */
+.t{position:absolute;right:100px;top:0;bottom:0;width:600px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.t h1{font:700 200px/1.0 'El Messiri';color:var(--gold2);margin-top:-18px;
+  text-shadow:0 2px 0 #8a5a0a,0 7px 0 #3a250a,0 0 44px rgba(242,182,50,.6),0 0 110px rgba(242,182,50,.28)}
+.rule{width:400px;height:3px;margin:18px 0 22px;background:linear-gradient(90deg,transparent,var(--gold),#fff3c9,var(--gold),transparent);box-shadow:0 0 14px rgba(242,182,50,.8);position:relative}
+.rule:after{content:"";position:absolute;left:50%;top:50%;width:16px;height:16px;transform:translate(-50%,-50%) rotate(45deg);background:var(--gold);box-shadow:0 0 14px #F2B632}
+.t p{font:700 40px/1.35 'Tajawal';color:#f6e7c8;white-space:nowrap}
+.t .s{margin-top:10px;font:500 30px 'Tajawal';color:#c9a96a}
+.frame{position:absolute;inset:18px;border:2px solid rgba(242,182,50,.35);border-radius:28px;box-shadow:inset 0 0 0 1px rgba(255,211,110,.08),0 0 24px rgba(242,182,50,.12)}
+.vign{position:absolute;inset:0;background:radial-gradient(ellipse 120% 100% at 50% 50%,transparent 58%,rgba(5,3,1,.7) 100%)}
+</style></head>
+<body><div class="b" id="b">
+  <div class="photo"></div><div class="fog"></div><div class="warm"></div>
+  <div class="laser l1"></div><div class="laser l2"></div>
+  <div class="orbit"><div class="r1"></div><div class="r2"></div><div class="orb"></div>
+    <i class="dot" style="left:30px;top:200px"></i><i class="dot" style="right:60px;bottom:110px;width:10px;height:10px"></i></div>
+  <div class="vign"></div>
+  <div class="t">
+    <h1>المستور</h1>
+    <div class="rule"></div>
+    <p>موسوعة الإمام المهدي عليه السلام</p>
+    <div class="s">بإشراف مجموعة بقية الله</div>
+  </div>
+  <div class="frame"></div>
+</div>
+<script>
+const b=document.getElementById('b');
+[[640,90,2.5],[1180,110,2.5],[700,610,2],[1210,600,2],[600,330,1.8],[960,48,1.6]].forEach(([x,y,r])=>{const s=document.createElement('i');s.className='spark';s.style.cssText=`left:${x}px;top:${y}px;width:${r*2}px;height:${r*2}px`;b.appendChild(s)});
+</script>
+</body></html>
